@@ -1,0 +1,26 @@
+{
+  "version": "2024-kaitei.seed.2",
+  "revision": "令和6年度(2024年度)介護報酬改定",
+  "items": 8,
+  "sources": {
+    "statute": 0,
+    "agency": 2,
+    "secondary": 3
+  },
+  "unconfirmed_requirements": 5,
+  "open_conflicts": 1,
+  "questions_required": [
+    "q_nv_bcp_plan",
+    "q_nv_bcp_stock",
+    "q_nv_bcp_train",
+    "q_nv_gy_committee",
+    "q_nv_gy_officer",
+    "q_nv_gy_policy",
+    "q_nv_gy_training",
+    "q_nv_kasan",
+    "q_nv_shiji",
+    "q_nv_staff"
+  ],
+  "checked_at": "2026-08-23",
+  "passed": true
+}

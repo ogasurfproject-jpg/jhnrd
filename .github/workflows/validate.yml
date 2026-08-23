@@ -1,0 +1,36 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: run the validator
+        run: python3 tools/validate.py
+      - name: status.json must match the data
+        run: |
+          git diff --exit-code -- status.json || {
+            echo "status.json is out of step with the data."
+            echo "Run python3 tools/validate.py and commit status.json too."
+            exit 1
+          }
+      - name: surface the statute count instead of hiding it
+        run: |
+          python3 -c "
+          import json
+          s = json.load(open('status.json', encoding='utf-8'))
+          st = s['sources']['statute']
+          print('sources tier=statute: %d' % st)
+          print('items %d / unconfirmed %d / open conflicts %d' % (s['items'], s['unconfirmed_requirements'], s['open_conflicts']))
+          if st == 0:
+              print('No item rests on the statute text yet. Not a failure, but not usable for a billing decision either.')
+          "
