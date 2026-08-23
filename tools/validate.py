@@ -183,6 +183,14 @@ def main():
     for a in askable_now:
         print("  ・" + a)
 
+    fnd = db.get("findings") or []
+    print("\n途中まで分かったこと: %d 件 (結論ではない)" % len(fnd))
+    for f in fnd:
+        print("  ・%s" % f.get("about"))
+        print("    分かった  : %s" % str(f.get("known", {}).get("text", ""))[:64])
+        for nk in (f.get("not_known") or [])[:2]:
+            print("    未確認    : %s" % nk[:60])
+
     print("\n未解決の食い違い: %d 件" % len(conflicts))
     for n, a, st in conflicts:
         print("  ・%s / %s (%s)" % (n, a, st))
