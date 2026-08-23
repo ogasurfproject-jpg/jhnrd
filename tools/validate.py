@@ -128,9 +128,17 @@ def main():
     for i, r in enumerate(fr):
         rid = r.get("id") or ("field_report[%d]" % i)
         fr_ids.add(rid)
-        for need in ("item_id", "reported_by", "reported_at", "text"):
+        for need in ("reported_by", "reported_at", "text"):
             if not r.get(need):
                 errs.append("%s に %s がない" % (rid, need))
+        # 2026-08-23: 現場からの報告は、どこかを指していなければならない。
+        #   item_id  … データベースにある規則についての話
+        #   fills_gap … データベースにまだ無いこと(穴)についての話
+        #   どちらも無い報告は、後から読んでも何の話か分からない。
+        #   分からない報告は、使えないだけでなく、誤って別の規則の根拠に見える。
+        if not r.get("item_id") and not r.get("fills_gap"):
+            errs.append("%s が item_id も fills_gap も持っていない"
+                        "(どの規則、あるいはどの穴についての話かが分からない)" % rid)
         if r.get("item_id") and r["item_id"] not in {x.get("id") for x in db.get("items", [])}:
             errs.append("%s が知らない項目 %s を指している" % (rid, r["item_id"]))
     if fr_ids:
