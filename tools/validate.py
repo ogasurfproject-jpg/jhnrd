@@ -149,6 +149,48 @@ def main():
                             errs.append("%s/%s/%s が現場の実務 %s を規則の出典にしている"
                                         % (it.get("id"), key, r.get("id"), ref))
 
+    # 7. ヒアリングの設問。2026-08-23、設問文を industry.js から DB に移した。
+    #    要件が ask を出しているのに文面が無ければ、その要件については誰にも尋ねていない。
+    #    それは落ちない。例外も出ない。だからここで落とす。
+    qs = db.get("questions") or []
+    qids, dup = set(), set()
+    for i, q in enumerate(qs):
+        qid = q.get("id") or "questions[%d]" % i
+        if qid in qids:
+            dup.add(qid)
+        qids.add(qid)
+        for need in ("w", "text", "purpose"):
+            if not q.get(need):
+                errs.append("設問 %s に %s がない" % (qid, need))
+        if q.get("purpose") == "field":
+            # 現場質問は、規則の出典ではないことを、それ自身に書いてあること。
+            # 書いていないと、あとで読んだ人が出典として使う。
+            for need in ("fills_gap", "gives"):
+                if not q.get(need):
+                    errs.append("現場質問 %s に %s がない"
+                                "(何の穴を埋めるために訊くのかが分からない設問は訊かない)" % (qid, need))
+            if q.get("not_a_source") is not True:
+                errs.append("現場質問 %s に not_a_source:true がない" % qid)
+    if dup:
+        errs.append("設問の id が重複している: %s" % ", ".join(sorted(dup)))
+
+    silent = sorted(asks - qids)
+    if silent:
+        errs.append("要件が ask を出しているのに設問文が無い: %s"
+                    "(この要件については誰にも尋ねていない)" % ", ".join(silent))
+    stray = sorted(qids - asks - {q["id"] for q in qs if q.get("purpose") == "field"})
+    if stray:
+        warns.append("どの要件のためでもない設問がある: %s" % ", ".join(stray))
+
+    # 設問を、規則の出典に使っていないか。field_reports と同じ理由で禁じる。
+    for it in db.get("items", []):
+        for key in ("requirements", "rules", "watch"):
+            for r in it.get(key, []):
+                for ref in (r.get("source_ref") or []):
+                    if ref in qids:
+                        errs.append("%s/%s/%s が設問 %s を出典にしている"
+                                    % (it.get("id"), key, r.get("id"), ref))
+
     # 5. 断定の言い方を置いていないか
     for p, s in walk_strings(db):
         if p.endswith("/we_do_not_say") or "/discipline" in p:
@@ -181,6 +223,17 @@ def main():
     for it in db.get("items", []):
         for c in it.get("conflicts", []):
             conflicts.append((it.get("name"), c.get("about"), c.get("status")))
+    byp = {}
+    for q in (db.get("questions") or []):
+        byp[q.get("purpose")] = byp.get(q.get("purpose"), 0) + 1
+    print("\nヒアリングの設問: %d 問" % len(db.get("questions") or []))
+    print("  要件を確かめる      : %d 問" % byp.get("requirement", 0))
+    print("  DBの穴を埋める現場質問: %d 問 (答えは field_reports へ。出典にはしない)"
+          % byp.get("field", 0))
+    for q in (db.get("questions") or []):
+        if q.get("purpose") == "field":
+            print("    ・%-20s 穴: %s" % (q.get("id"), str(q.get("fills_gap"))[:46]))
+
     print("\n現場からの報告: %d 件 (規則の出典ではない)" % len(db.get("field_reports") or []))
     for r in (db.get("field_reports") or []):
         print("  ・%s: %s (%s)" % (r.get("item_id"), str(r.get("text"))[:44], r.get("reported_by")))
