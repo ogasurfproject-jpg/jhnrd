@@ -67,6 +67,10 @@ def main():
             errs.append("出典 %s に url がない" % sid)
         if not s.get("retrieved_at"):
             errs.append("出典 %s に取得日がない" % sid)
+        # 条文そのものでも、改正前の版なら現行の根拠にはならない。
+        # 素性が強いことと、いま有効であることは別である。
+        if s.get("current") is False and not s.get("not_current_reason"):
+            errs.append("出典 %s が current:false なのに理由がない" % sid)
 
     def check_refs(where, obj):
         refs = obj.get("source_ref") or []
@@ -160,8 +164,17 @@ def main():
     print("出典の素性:")
     for t in TIERS:
         print("  %-10s (%s) %d件" % (t, TIER_JA[t], tiers.get(t, 0)))
-    if not tiers.get("statute"):
-        print("  → 告示・通知の原文は、まだ1件も無い。この版の数字は、実務判断の前に原文との突合が要る。")
+    stale = [k for k, v in src.items() if v.get("current") is False]
+    cur_statute = sum(1 for v in src.values()
+                      if v.get("tier") == "statute" and v.get("current") is not False)
+    if stale:
+        print("  うち現行版でないもの: %d件" % len(stale))
+        for k in stale:
+            print("    ・%s: %s" % (k, str(src[k].get("not_current_reason", ""))[:52]))
+        print("  現行版の statute    : %d件" % cur_statute)
+    if not cur_statute:
+        print("  → 現行の告示・通知の原文は、まだ1件も無い。"
+              "この版の数字は、実務判断の前に原文との突合が要る。")
 
     # 出典どうしの食い違い。解けていないものは必ず出す。黙って片方を採らない。
     conflicts = []
@@ -218,6 +231,8 @@ def main():
         "revision": db.get("revision"),
         "items": len(db.get("items", [])),
         "sources": {t: tiers.get(t, 0) for t in TIERS},
+        "sources_not_current": len(stale),
+        "statute_current": cur_statute,
         "unconfirmed_requirements": len(unconf),
         "open_conflicts": len(conflicts),
         "field_reports": len(db.get("field_reports") or []),
