@@ -1,5 +1,5 @@
 {
-  "version": "2024-kaitei.seed.3",
+  "version": "2024-kaitei.seed.4",
   "revision": "令和6年度(2024年度)介護報酬改定",
   "items": 8,
   "sources": {
@@ -9,6 +9,8 @@
   },
   "unconfirmed_requirements": 6,
   "open_conflicts": 1,
+  "field_reports": 0,
+  "askable_from_provider": 2,
   "questions_required": [
     "q_nv_bcp_plan",
     "q_nv_bcp_stock",

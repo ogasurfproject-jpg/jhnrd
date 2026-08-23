@@ -14,6 +14,10 @@ JCCDB に対する適正診断と同じで、物差しそのものが検査を�
   4. requirements の各項目は、ヒアリングの設問と結ばれていること。
      結べない要件は、聞けていない要件である。
   5. 「算定できる」と読める断定を、データの中に置かないこと。
+  6. 現場の実務(field_reports)を、規則の出典として使っていないこと。
+     事業所が毎月扱っている事実は貴重だが、「実際どう運用されているか」は
+     「何が定められているか」ではない。混ぜた瞬間、事業所が言ったことが
+     制度が定めたことにすり替わる。
 
 一つでも落ちたら非ゼロで終わる。数字を出す前に、この検査を通す。
 """
@@ -114,6 +118,33 @@ def main():
         if not it.get("sources"):
             warns.append("%s に item 単位の sources がない" % iid)
 
+    # 6. 現場の実務を、規則の出典に使っていないか。
+    fr = db.get("field_reports") or []
+    fr_ids = set()
+    for i, r in enumerate(fr):
+        rid = r.get("id") or ("field_report[%d]" % i)
+        fr_ids.add(rid)
+        for need in ("item_id", "reported_by", "reported_at", "text"):
+            if not r.get(need):
+                errs.append("%s に %s がない" % (rid, need))
+        if r.get("item_id") and r["item_id"] not in {x.get("id") for x in db.get("items", [])}:
+            errs.append("%s が知らない項目 %s を指している" % (rid, r["item_id"]))
+    if fr_ids:
+        for it in db.get("items", []):
+            for block in ("effect", "timeline"):
+                b = it.get(block)
+                if isinstance(b, dict):
+                    for ref in (b.get("source_ref") or []):
+                        if ref in fr_ids:
+                            errs.append("%s/%s が現場の実務 %s を規則の出典にしている"
+                                        % (it.get("id"), block, ref))
+            for key in ("requirements", "rules", "watch"):
+                for r in it.get(key, []):
+                    for ref in (r.get("source_ref") or []):
+                        if ref in fr_ids:
+                            errs.append("%s/%s/%s が現場の実務 %s を規則の出典にしている"
+                                        % (it.get("id"), key, r.get("id"), ref))
+
     # 5. 断定の言い方を置いていないか
     for p, s in walk_strings(db):
         if p.endswith("/we_do_not_say") or "/discipline" in p:
@@ -137,6 +168,21 @@ def main():
     for it in db.get("items", []):
         for c in it.get("conflicts", []):
             conflicts.append((it.get("name"), c.get("about"), c.get("status")))
+    print("\n現場からの報告: %d 件 (規則の出典ではない)" % len(db.get("field_reports") or []))
+    for r in (db.get("field_reports") or []):
+        print("  ・%s: %s (%s)" % (r.get("item_id"), str(r.get("text"))[:44], r.get("reported_by")))
+
+    print("\n事業所に聞けば運用が分かる未確認: ", end="")
+    askable_now = []
+    for it in db.get("items", []):
+        for key in ("rules", "requirements"):
+            for r in it.get(key, []):
+                if r.get("confirmed") is False and r.get("can_ask_provider"):
+                    askable_now.append(it.get("name") + " / " + str(r.get("text"))[:36])
+    print("%d 件" % len(askable_now))
+    for a in askable_now:
+        print("  ・" + a)
+
     print("\n未解決の食い違い: %d 件" % len(conflicts))
     for n, a, st in conflicts:
         print("  ・%s / %s (%s)" % (n, a, st))
@@ -166,10 +212,24 @@ def main():
         "sources": {t: tiers.get(t, 0) for t in TIERS},
         "unconfirmed_requirements": len(unconf),
         "open_conflicts": len(conflicts),
+        "field_reports": len(db.get("field_reports") or []),
+        "askable_from_provider": len(askable_now),
         "questions_required": sorted(asks),
         "checked_at": db.get("built_at"),
         "passed": not errs,
     }
+    # status.json は、リポジトリ本体のデータを検査したときだけ書く。
+    # 2026-08-23、壊したコピーを検査したときに status.json を上書きしてしまった。
+    # 検査は読むだけの操作であるべきで、どこを見たかで結果が書き換わってはいけない。
+    if os.path.abspath(path) != os.path.abspath(DEFAULT):
+        print("\n(既定のデータではないので status.json は書きません: %s)" % path)
+        if errs:
+            print("\n検査: 赤")
+            for e in errs:
+                print("  ・" + e)
+            sys.exit(2)
+        print("\n検査: 緑")
+        return
     out = os.path.join(os.path.dirname(path), "..", "status.json")
     try:
         io.open(os.path.abspath(out), "w", encoding="utf-8").write(
