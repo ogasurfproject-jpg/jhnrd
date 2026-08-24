@@ -41,12 +41,24 @@ def git(*args):
 
 
 def seedno(t):
-    m = re.search(r"seed\.(\d+)$", t)
-    return int(m.group(1)) if m else -1
+    """seed.19 と seed.19.1 の両方を受ける。
+
+    2026-08-24: データの版(seed)が動かないまま、周りだけが変わることがある。
+      公開MCP・利益相反の開示・レジストリの名刺など。
+      そのとき seed を上げるのは嘘になる(中身は同じなので)が、
+      Zenodo の Release は切りたい。だから seed.19.1 の形を足した。
+      数え方は (seed, 枝番)。枝番が無ければ 0。
+      正規表現を $ で締めていたので、足す前は seed.19.1 が黙って一覧から落ちていた。
+      黙って落ちるのが一番よくないので、ここに書いておく。
+    """
+    m = re.search(r"seed\.(\d+)(?:\.(\d+))?$", t)
+    if not m:
+        return (-1, -1)
+    return (int(m.group(1)), int(m.group(2) or 0))
 
 
 def main():
-    tags = [t for t in git("tag", "-l", "seed.*").split() if seedno(t) >= 0]
+    tags = [t for t in git("tag", "-l", "seed.*").split() if seedno(t)[0] >= 0]
     tags.sort(key=seedno, reverse=True)
     if not tags:
         sys.exit("seed.* の tag がありません。")
@@ -59,8 +71,8 @@ def main():
         parts.append("\n## `%s` — %s\n\n%s\n\n<sub>commit `%s` ・ `git show %s`</sub>\n"
                      % (t, date, body if body else "（注釈なし）", subject, t))
 
-    missing = [n for n in range(1, seedno(tags[0]) + 1)
-               if n not in [seedno(t) for t in tags]]
+    have = set(seedno(t)[0] for t in tags)
+    missing = [n for n in range(1, seedno(tags[0])[0] + 1) if n not in have]
     if missing:
         parts.append("\n---\n\n<sub>seed.%s は、その番号で commit された状態が存在しないため "
                      "tag がありません（版を切らずに番号だけ進んだもの）。"
