@@ -22,10 +22,15 @@ import io, json, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
 README = os.path.join(ROOT, "README.md")
+README_EN = os.path.join(ROOT, "README_en.md")
 STATUS = os.path.join(ROOT, "status.json")
 RULES = os.path.join(ROOT, "data", "rules_2024.json")
 
 BLOCKS = ("caution", "state", "gaps", "footer")
+
+# 2026-08-24 追記: 英語版も同じ印で生成する。
+#   訳文を手で置いておくと、日本語だけ直って英語が古いまま残る。
+#   外から最初に読まれるのは英語の方なので、そちらが古い方が損害が大きい。
 
 
 def build(st, db):
@@ -83,6 +88,61 @@ def build(st, db):
     return out
 
 
+def build_en(st, db):
+    src = st["sources"]
+    cur = st.get("statute_current", 0)
+    stale = st.get("sources_not_current", 0)
+    total_src = sum(src.values())
+    out = {}
+
+    if cur == 0:
+        out["caution"] = ("**No source yet rests on the current statute text (`statute`).**\n\n"
+                          "Nothing in this version should reach a billing decision without being "
+                          "checked against the statute text first.")
+    else:
+        out["caution"] = (
+            "**%d sources currently rest on the statute text itself** "
+            "(`statute` — the ministerial notice, ordinance or circular). "
+            "`statute` is %d in total; %d of those are superseded revisions and "
+            "**cannot be used as current authority.** They are kept only so that the "
+            "revision history is legible.\n\n"
+            "The rest are ministry material that is not the statute text (`agency`, %d) "
+            "and private commentary (`secondary`, %d).\n\n"
+            "**%d requirements are unconfirmed.** Anything we could not check against the "
+            "statute text says so. It is not left blank."
+            % (cur, src.get("statute", 0), stale, src.get("agency", 0),
+               src.get("secondary", 0), st.get("unconfirmed_requirements", 0)))
+
+    out["state"] = "\n".join([
+        "| | |", "|---|---|",
+        "| Version | `%s` |" % st["version"],
+        "| Items | **%d** |" % st["items"],
+        "| Sources — `statute` (the notice/ordinance/circular itself) | %d |" % src.get("statute", 0),
+        "| of which **current** | **%d** |" % cur,
+        "| Sources — `agency` (MHLW material, not the statute text) | %d |" % src.get("agency", 0),
+        "| Sources — `secondary` (private commentary) | %d |" % src.get("secondary", 0),
+        "| Sources, total | %d (%d not current) |" % (total_src, stale),
+        "| Unconfirmed requirements | **%d** |" % st.get("unconfirmed_requirements", 0),
+        "| Conflicts | %d total / **%d** unresolved |"
+        % (st.get("conflicts_total", 0), st.get("open_conflicts", 0)),
+        "| Field reports | %d (never a source of rules) |" % st.get("field_reports", 0),
+        "| Last validated | %s |" % st.get("checked_at", "—"),
+        "",
+        "%d items. **This is not a complete map of the rules.** The name runs ahead of the "
+        "contents, and the item count is put first so that this is not hidden." % st["items"],
+    ])
+
+    gaps = [g for g in (db.get("known_gaps") or []) if not g.get("resolved")]
+    out["gaps"] = ("Unfilled gaps are recorded in `known_gaps` inside `data/rules_2024.json` "
+                   "— currently **%d** (resolved ones are kept, marked as resolved)." % len(gaps))
+
+    out["footer"] = ("A construction-cost database built to the same disciplines exists at "
+                     "[JCCDB](https://shield.the-horizons-innovation.com/). JHNRD aims to stand "
+                     "in the same place for home-visit nursing. **It is %d items so far.**"
+                     % st["items"])
+    return out
+
+
 def apply_blocks(text, blocks):
     for name in BLOCKS:
         pat = re.compile(r"(<!-- auto:%s:start -->\n)(.*?)(\n<!-- auto:%s:end -->)"
@@ -96,16 +156,23 @@ def apply_blocks(text, blocks):
 def main():
     st = json.load(io.open(STATUS, encoding="utf-8"))
     db = json.load(io.open(RULES, encoding="utf-8"))
-    cur = io.open(README, encoding="utf-8").read()
-    new = apply_blocks(cur, build(st, db))
-    if new == cur:
-        print("README は status.json と一致しています。")
+    drift = []
+    for path, builder in ((README, build), (README_EN, build_en)):
+        cur = io.open(path, encoding="utf-8").read()
+        new = apply_blocks(cur, builder(st, db))
+        if new != cur:
+            drift.append((path, new))
+
+    if not drift:
+        print("README.md / README_en.md は status.json と一致しています。")
         return 0
     if "--write" in sys.argv:
-        io.open(README, "w", encoding="utf-8").write(new)
-        print("README を書き直しました。")
+        for path, new in drift:
+            io.open(path, "w", encoding="utf-8").write(new)
+            print("書き直しました: %s" % os.path.basename(path))
         return 0
-    print("README が status.json とずれています。")
+    for path, _ in drift:
+        print("status.json とずれています: %s" % os.path.basename(path))
     print("  python3 tools/update_readme.py --write  で直せます。")
     return 1 if "--check" in sys.argv else 0
 

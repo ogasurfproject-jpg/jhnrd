@@ -23,6 +23,36 @@ jobs:
             echo "Run python3 tools/update_readme.py --write and commit README.md too."
             exit 1
           }
+      - name: the machine-readable metadata must match status.json
+        run: |
+          python3 tools/make_metadata.py --check || {
+            echo "datapackage.json / .zenodo.json are out of step with status.json."
+            echo "Run python3 tools/make_metadata.py --write and commit them too."
+            exit 1
+          }
+      - name: the conflict-of-interest disclosure must still be there
+        run: |
+          python3 -c "
+          import io, sys
+          need = [
+              ('README.md', '## 利益相反の開示'),
+              ('README.md', '有償のサービスを訪問看護事業所に販売しています'),
+              ('README_en.md', '## Conflict of interest'),
+              ('GOVERNANCE.md', '有償のサービスを、訪問看護事業所に販売しています'),
+              ('datapackage.json', 'conflict_of_interest'),
+              ('.zenodo.json', 'Conflict of interest'),
+          ]
+          bad = [(f, s) for f, s in need
+                 if s not in io.open(f, encoding='utf-8').read()]
+          for f, s in bad:
+              print('missing from %s: %s' % (f, s))
+          if bad:
+              print('')
+              print('The disclosure is not decoration. A dataset that sells a service on top')
+              print('of itself and stops saying so has stopped being usable as a measure.')
+              sys.exit(1)
+          print('disclosure present in all %d places' % len(need))
+          "
       - name: status.json must match the data
         run: |
           git diff --exit-code -- status.json || {

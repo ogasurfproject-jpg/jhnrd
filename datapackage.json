@@ -1,0 +1,92 @@
+{
+  "$schema": "https://datapackage.org/profiles/1.0/datapackage.json",
+  "name": "jhnrd",
+  "title": "JHNRD — Japan Home-visit Nursing Reimbursement Database",
+  "id": "https://github.com/ogasurfproject-jpg/jhnrd",
+  "version": "2024-kaitei.seed.19",
+  "description": "訪問看護の減算・加算・指示書の期限について、要件と、その要件がどの資料に基づくかを一つずつ記録したデータセット。数字そのものは公開情報であり、ここが持っているのは「その数字がどこから来たのか」という記録である。出典は statute(告示・省令・通知の原文) / agency(厚生労働省の資料) / secondary(民間の解説) の三段階で素性を名乗り、現行版かどうかを別に持つ。確認できていない要件は空欄にせず confirmed:false と理由を残す。出典どうしが食い違ったときは、片方を選ばず両方を残す。取りに行って取れなかった記録(attempts)も公開する。算定の可否は判定しない。この版は 33 項目・出典 25 件(うち現行の statute 7 件)・未確認の要件 48 件・未解決の食い違い 0 件。33 項目は訪問看護の算定要件を網羅した数ではない。",
+  "homepage": "https://github.com/ogasurfproject-jpg/jhnrd",
+  "created": "2026-08-24",
+  "licenses": [
+    {
+      "name": "CC-BY-4.0",
+      "path": "https://creativecommons.org/licenses/by/4.0/",
+      "title": "Creative Commons Attribution 4.0 International"
+    }
+  ],
+  "contributors": [
+    {
+      "title": "Toshikatsu Oga",
+      "givenName": "Toshikatsu",
+      "familyName": "Oga",
+      "roles": [
+        "author",
+        "maintainer"
+      ],
+      "organization": "The HORIZONs Inc. (法人番号 7021001075279)",
+      "path": "https://orcid.org/0009-0000-9180-903X"
+    }
+  ],
+  "keywords": [
+    "訪問看護",
+    "介護報酬",
+    "診療報酬",
+    "算定要件",
+    "出典",
+    "provenance",
+    "home-visit nursing",
+    "long-term care insurance",
+    "health insurance",
+    "reimbursement",
+    "Japan",
+    "open data"
+  ],
+  "languages": [
+    "ja"
+  ],
+  "resources": [
+    {
+      "name": "rules",
+      "path": "data/rules_2024.json",
+      "title": "要件と出典の本体",
+      "description": "items[] が要件、sources{} が出典。attempts / findings / conflicts / known_gaps に、取れなかったもの・途中までのもの・食い違い・埋まっていないものを残す。",
+      "format": "json",
+      "mediatype": "application/json",
+      "encoding": "utf-8"
+    },
+    {
+      "name": "status",
+      "path": "status.json",
+      "title": "検査器が吐いた、いまの状態",
+      "description": "tools/validate.py の出力そのまま。README と datapackage.json の数字はここから生成され、ずれていれば CI が止める。",
+      "format": "json",
+      "mediatype": "application/json",
+      "encoding": "utf-8"
+    }
+  ],
+  "x-jhnrd": {
+    "note": "この節の数字は tools/make_metadata.py が status.json から生成する。手で書かない。",
+    "counts": {
+      "items": 33,
+      "sources_total": 25,
+      "sources_statute": 10,
+      "sources_statute_current": 7,
+      "sources_agency": 8,
+      "sources_secondary": 7,
+      "sources_not_current": 5,
+      "unconfirmed_requirements": 48,
+      "conflicts_total": 3,
+      "open_conflicts": 0,
+      "field_reports": 0,
+      "checked_at": "2026-08-24"
+    },
+    "tiers": {
+      "statute": "告示・省令・通知の原文。最も強い。",
+      "agency": "厚生労働省が出した資料。原文ではない。",
+      "secondary": "民間の解説。単独では確定にしない。"
+    },
+    "we_do_not_say": "算定できます・該当します、とは言わない。検査器が拒否する。",
+    "conflict_of_interest": "利益相反: The HORIZONs株式会社は、このデータベースを裏付けに使った有償のサービスを訪問看護事業所に販売している。収入源は顧客からの対価のみで、行政・業界団体・ベンダからの資金提供、掲載料、広告は受けていない。詳細は GOVERNANCE.md を参照のこと。",
+    "governance": "https://github.com/ogasurfproject-jpg/jhnrd/blob/main/GOVERNANCE.md"
+  }
+}

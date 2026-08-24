@@ -1,0 +1,31 @@
+name: 抜け（そもそも入っていない）
+description: 未確認とも書かれずに、項目そのものが無い
+title: "抜け: "
+labels: ["抜け", "gap"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **いま 33 項目しかありません。網羅した数字ではありません。**
+        抜けの指摘は `known_gaps` に入れ、埋まるまで公開したまま残します。
+  - type: input
+    id: name
+    attributes:
+      label: 入っていない加算・減算・要件の名前
+    validations:
+      required: true
+  - type: dropdown
+    id: insurance
+    attributes:
+      label: どちらの保険か
+      options:
+        - 介護保険
+        - 医療保険
+        - 両方 / わからない
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: 根拠（あれば。無くても受け取ります）
+      description: 出典が無くても構いません。「無い」という指摘だけで十分価値があります。

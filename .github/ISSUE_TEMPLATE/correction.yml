@@ -1,0 +1,68 @@
+name: 訂正（記述が原文と違う）
+description: このデータベースの記述が間違っている、原文と食い違っている
+title: "訂正: "
+labels: ["訂正", "correction"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **訂正は不具合として扱います。** 事業所を運営されている必要はありません。
+        元の記述は消さずに、訂正として上に積みます。
+  - type: input
+    id: version
+    attributes:
+      label: 見た版（version）
+      description: "`status.json` の version、または README の「版」。例: 2024-kaitei.seed.19"
+      placeholder: 2024-kaitei.seed.19
+    validations:
+      required: true
+  - type: input
+    id: item
+    attributes:
+      label: どの項目か
+      description: "`data/rules_2024.json` の items[].id、または項目名"
+      placeholder: genzan-bcp / 業務継続計画未策定減算
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: いまこう書いてある
+    validations:
+      required: true
+  - type: textarea
+    id: correct
+    attributes:
+      label: 正しくはこう
+    validations:
+      required: true
+  - type: dropdown
+    id: tier
+    attributes:
+      label: 根拠の素性
+      options:
+        - statute（告示・省令・通知の原文）
+        - agency（厚生労働省が出した資料。原文ではない）
+        - secondary（民間の解説）
+        - 出典なし（現場での経験・伝聞）
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: 根拠（資料名・号数・URL と、該当箇所の短い引用）
+      description: |
+        **丸ごとの要約ではなく、該当箇所だけを短く引用してください。**
+        表を要約すると別の表の数字が混ざります（規律 10）。
+      placeholder: |
+        厚生労働省告示第◯号（令和◯年◯月◯日）
+        https://...
+        「…（該当箇所の引用）…」
+    validations:
+      required: true
+  - type: input
+    id: current_ver
+    attributes:
+      label: その資料は現行版か
+      description: 改定前の版であれば、そう書いてください。改定前でも記録として受け取ります。
+      placeholder: 令和8年6月施行版 / 令和6年4月版（改定前）

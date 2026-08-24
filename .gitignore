@@ -1,3 +1,8 @@
 
 # 移行前の控え。履歴に残す必要はない。
 *.bak_*
+
+# 作業中に作った置き場。リポジトリの中身ではない。
+_git_locks_held/
+_to_delete_patches/
+_to_delete/

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 利益相反・運営についての指摘
+    url: https://github.com/ogasurfproject-jpg/jhnrd/blob/main/GOVERNANCE.md
+    about: 誰が作り、誰に養われているか。この文書自体の書き漏らしの指摘も Issue で受け取ります。
+  - name: 請求・届出の判断に使う前に
+    url: https://github.com/ogasurfproject-jpg/jhnrd/blob/main/README.md
+    about: このデータベースは算定の可否を判定しません。必ず原文を確認してください。
