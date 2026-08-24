@@ -122,6 +122,58 @@ def main():
         if not it.get("sources"):
             warns.append("%s に item 単位の sources がない" % iid)
 
+    # 8. 版が現行かどうか。2026-08-24 追加。
+    #    版が古いことは落ちない。例外も出ない。数字はいつでも出てくる。
+    #    「令和6年度改定」と書いたデータベースから2026年8月に単位数を出しても、
+    #    データベースは何も文句を言わない。文句を言うのは返戻が返ってきたあとである。
+    #    だからここで止める。
+    revs = {r.get("id"): r for r in (db.get("revisions") or [])}
+    if revs:
+        for it in db.get("items", []):
+            iid = it.get("id", "(id無し)")
+            eff = it.get("effect")
+            rid = (eff or {}).get("revision") if isinstance(eff, dict) else None
+            rid = rid or it.get("revision")
+            rc = (eff or {}).get("revision_recheck") if isinstance(eff, dict) else None
+            rc = rc or it.get("revision_recheck")
+            if not rid:
+                errs.append("%s に版(revision)がない。どの改定を見て作ったのかが分からない" % iid)
+                continue
+            if rid not in revs:
+                errs.append("%s が知らない版 %s を指している" % (iid, rid))
+                continue
+            sup = revs[rid].get("superseded_by")
+            if sup:
+                # 上書きされた版の数字を、現行として置いていないか。
+                # 置いてよいのは「当て直しが要る」と自分で書いてあるときだけ。
+                if not (isinstance(rc, dict) and rc.get("needed") is True and rc.get("why")):
+                    errs.append("%s は上書きされた版 %s の数字を持っているのに、"
+                                "revision_recheck.needed:true と why が無い"
+                                "(現行の根拠として使われる)" % (iid, rid))
+                else:
+                    warns.append("%s は %s の版。%s に上書きされている。当て直しが要る"
+                                 % (iid, rid, sup))
+        # 現行の版が1つでもあるか。全部が旧版なら、このデータベースは現行を語れない。
+        cur_kaigo = [r for r in revs.values()
+                     if r.get("insurance") == "介護" and not r.get("superseded_by")]
+        cur_iryo = [r for r in revs.values()
+                    if r.get("insurance") == "医療" and not r.get("superseded_by")]
+        for label, cur in (("介護", cur_kaigo), ("医療", cur_iryo)):
+            if not cur:
+                errs.append("%s 保険側に、上書きされていない版が1つも無い" % label)
+                continue
+            rid = cur[0]["id"]
+            n = 0
+            for it in db.get("items", []):
+                eff = it.get("effect")
+                got = (eff or {}).get("revision") if isinstance(eff, dict) else None
+                got = got or it.get("revision")
+                if got == rid:
+                    n += 1
+            if n == 0:
+                warns.append("%s 保険側の現行版 %s(%s 施行)で作った項目が、まだ1件も無い"
+                             % (label, rid, cur[0].get("effective_from")))
+
     # 6. 現場の実務を、規則の出典に使っていないか。
     fr = db.get("field_reports") or []
     fr_ids = set()
@@ -299,7 +351,11 @@ def main():
         "field_reports": len(db.get("field_reports") or []),
         "askable_from_provider": len(askable_now),
         "questions_required": sorted(asks),
-        "checked_at": db.get("built_at"),
+        # 2026-08-24: ここは built_at を checked_at という名前で出していた。
+        #   「いつ作ったか」と「いつ検査したか」は別の事実である。
+        #   同じ値を二つの名前で出すと、検査していない日付が検査日として残る。
+        "built_at": db.get("built_at"),
+        "checked_at": __import__("datetime").date.today().isoformat(),
         "passed": not errs,
     }
     # status.json は、リポジトリ本体のデータを検査したときだけ書く。
