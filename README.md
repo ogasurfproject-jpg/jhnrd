@@ -12,7 +12,7 @@
 
 <sub>*A record of Japanese home-visit nursing reimbursement rules in which every requirement carries the document it rests on. Sources declare their own standing in three tiers, unconfirmed requirements are published as unconfirmed, and conflicting readings are kept side by side. It does not decide whether a claim may be billed. → [English](README_en.md)*</sub>
 
-**[利益相反の開示](#利益相反の開示) ・ [運営と意思決定](GOVERNANCE.md) ・ [直し方](CONTRIBUTING.md) ・ [版ごとの記録](CHANGELOG.md) ・ [引用する](#引用する)**
+**[公開MCP](#公開mcp-鍵なし読み取り専用) ・ [利益相反の開示](#利益相反の開示) ・ [運営と意思決定](GOVERNANCE.md) ・ [直し方](CONTRIBUTING.md) ・ [版ごとの記録](CHANGELOG.md) ・ [引用する](#引用する)**
 
 訪問看護の減算・加算・指示書の期限について、**要件と、その要件がどの資料に基づくかを、一つずつ記録したもの**です。
 
@@ -108,6 +108,31 @@ python3 tools/validate.py
 
 ---
 
+## 公開MCP（鍵なし・読み取り専用）
+
+このデータベースは、**MCP と素の HTTP の両方で配っています。鍵は要りません。書き込みの口はありません。**
+
+```
+POST /mcp    MCP (JSON-RPC 2.0)
+GET  /status.json  /items  /items/<id>  /sources  /search?q=
+     /unconfirmed  /conflicts  /gaps  /disclosure  /cite
+```
+
+中身は CC BY 4.0 で公開しています。ですが **JSON を置いてあるだけでは、道具として使うたびに誰かがパーサを書くことになります。書くたびに、書いた人の解釈が混ざります。** ここで配れば、混ざるのは一箇所で済みます。
+
+配る側にも、同じ線を引いてあります。
+
+- **算定の可否を判定しません。**「算定できます」「該当します」を返さないことを、**試験で機械的に確かめています。**
+- **どの応答にも、版と「算定の可否は判定しない」と利益相反の開示が必ず付きます。** 11個の道具すべてについて試験があります。
+- **鍵を持たず、KV も D1 も繋ぎません。** 繋いだ瞬間に、預かるものが生まれます。
+- **弱いところを見るための道具を先に置いています。** `jhnrd_unconfirmed`（確認できていない要件と理由）、`jhnrd_gaps`（取りに行って取れなかった記録を含む）、`jhnrd_conflicts`（両方の言い分を残したまま）。
+
+配るデータ（`mcp/rules.data.js`）は本体からの生成物で、**実行時に外へ取りに行きません。** 一度、raw.githubusercontent の縁に古い版が残って、内部の MCP が古い数字を配ったためです。**写しが本体とずれたら CI が赤になります。**
+
+→ 詳細と繋ぎ方は **[`mcp/README.md`](mcp/README.md)**
+
+---
+
 ## 中身
 
 ```
@@ -117,6 +142,10 @@ status.json               検査器が吐いた、いまの状態。README も�
 tools/update_readme.py    README の数字を status.json から引き直す（--check を CI が見る）
 tools/make_metadata.py    datapackage.json / .zenodo.json を生成（--check を CI が見る）
 tools/make_changelog.py   CHANGELOG.md を annotated tag から生成
+mcp/worker.js             公開MCP（鍵なし・読み取り専用）
+mcp/rules.data.js         公開MCPが配る写し（生成物。ずれたら CI が赤）
+mcp/mcp_test.mjs          公開MCPの試験（網は要らない。70件）
+tools/make_mcp_data.py    写しを本体から生成（--check を CI が見る）
 ```
 
 `data/rules_2024.json` の構造:

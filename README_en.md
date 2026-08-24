@@ -65,6 +65,27 @@ These are not aspirations. `tools/validate.py` checks them mechanically, and **C
 
 ---
 
+## Public MCP endpoint (no key, read-only)
+
+The dataset is served over MCP (JSON-RPC 2.0 at `POST /mcp`) and over plain HTTP
+(`/status.json`, `/items`, `/items/<id>`, `/sources`, `/search?q=`, `/unconfirmed`,
+`/conflicts`, `/gaps`, `/disclosure`, `/cite`). **No key. No write path.**
+
+The content is CC BY 4.0 already — but a JSON file on its own means every consumer writes a parser, and every parser mixes in its author's reading. Serving it means that happens in one place.
+
+The same line is drawn on the serving side:
+
+- **It does not decide whether a claim may be billed.** That it never returns such a statement is checked mechanically by the test suite.
+- **Every response carries the version, the "this does not decide billing" notice, and the conflict-of-interest disclosure.** All eleven tools are tested for it.
+- **It holds no key and is wired to no storage.** The moment it is, it starts holding something of someone's.
+- **The tools that expose the weaknesses come first**: `jhnrd_unconfirmed`, `jhnrd_gaps` (including searches that came back empty), `jhnrd_conflicts` (both readings kept).
+
+The copy it serves is generated from the dataset and **never fetched at runtime** — a CDN edge once kept a stale revision alive and an internal server handed out old numbers. **CI fails if the copy drifts from the source.**
+
+See [`mcp/README.md`](mcp/README.md).
+
+---
+
 ## Conflict of interest
 
 **The HORIZONs Inc., which maintains this dataset, sells a paid service to home-visit nursing providers that is backed by it.** Payment is taken as an initial build fee and a monthly fee.

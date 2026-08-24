@@ -30,6 +30,18 @@ jobs:
             echo "Run python3 tools/make_metadata.py --write and commit them too."
             exit 1
           }
+      - name: the copy the public MCP serves must match the data
+        run: |
+          python3 tools/make_mcp_data.py --check || {
+            echo "mcp/rules.data.js is out of step with data/rules_2024.json."
+            echo "Run python3 tools/make_mcp_data.py --write and commit it too."
+            exit 1
+          }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: the public MCP must not answer a billing question
+        run: node mcp/mcp_test.mjs
       - name: the conflict-of-interest disclosure must still be there
         run: |
           python3 -c "

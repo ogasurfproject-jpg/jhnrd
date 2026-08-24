@@ -1,0 +1,20 @@
+# JHNRD 公開MCP — 鍵なし・読み取り専用
+#
+# 打つ場所に注意: 必ずこのフォルダ(mcp/)の中で打つこと。
+#   cd mcp && npx wrangler deploy
+#
+# 鍵(secret)は 1 つも要らない。書き込みの口が無く、誰の何も預からないため。
+# KV も D1 も繋がない。繋いだ瞬間に、預かるものが生まれる。
+
+name = "jhnrd-mcp"
+main = "worker.js"
+compatibility_date = "2026-08-24"
+workers_dev = true
+
+[observability]
+enabled = true
+
+# 独自ドメインに載せるときは、ここを開ける。
+# [[routes]]
+# pattern = "jhnrd.the-horizons-innovation.com"
+# custom_domain = true
