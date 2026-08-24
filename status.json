@@ -10,7 +10,8 @@
   "sources_not_current": 4,
   "statute_current": 7,
   "unconfirmed_requirements": 45,
-  "open_conflicts": 1,
+  "conflicts_total": 2,
+  "open_conflicts": 0,
   "field_reports": 0,
   "askable_from_provider": 2,
   "questions_required": [

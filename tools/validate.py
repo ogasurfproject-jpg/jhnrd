@@ -283,6 +283,18 @@ def main():
     for it in db.get("items", []):
         for c in it.get("conflicts", []):
             conflicts.append((it.get("name"), c.get("about"), c.get("status")))
+    # 2026-08-24: データベース全体の conflicts を、ここは一度も見ていなかった。
+    #   項目に属さない食い違い(読み取りどうしの食い違いなど)は、数にも一覧にも出ていなかった。
+    for c in (db.get("conflicts") or []):
+        conflicts.append(("(データベース全体)", c.get("about"), c.get("status")))
+
+    # 2026-08-24: 「未解決の食い違い」と名乗って、status を見ずに全部数えていた。
+    #   解決と書き込んでも数が減らない。減らない数は、いずれ誰も見なくなる。
+    #   解決した食い違いも消さずに残すので(選んだ理由が消えるため)、
+    #   数えるほうを直す。全体の数と、未解決の数を、別々に出す。
+    def _unresolved(st):
+        return not str(st or "").startswith("解決")
+    open_conflicts = [x for x in conflicts if _unresolved(x[2])]
     byp = {}
     for q in (db.get("questions") or []):
         byp[q.get("purpose")] = byp.get(q.get("purpose"), 0) + 1
@@ -317,7 +329,7 @@ def main():
         for nk in (f.get("not_known") or [])[:2]:
             print("    未確認    : %s" % nk[:60])
 
-    print("\n未解決の食い違い: %d 件" % len(conflicts))
+    print("\n食い違い: 全 %d 件 / うち未解決 %d 件" % (len(conflicts), len(open_conflicts)))
     for n, a, st in conflicts:
         print("  ・%s / %s (%s)" % (n, a, st))
 
@@ -347,7 +359,8 @@ def main():
         "sources_not_current": len(stale),
         "statute_current": cur_statute,
         "unconfirmed_requirements": len(unconf),
-        "open_conflicts": len(conflicts),
+        "conflicts_total": len(conflicts),
+        "open_conflicts": len(open_conflicts),
         "field_reports": len(db.get("field_reports") or []),
         "askable_from_provider": len(askable_now),
         "questions_required": sorted(asks),
