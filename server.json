@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.ogasurfproject-jpg/jhnrd",
   "description": "Japan home-visit nursing reimbursement rules, each with its source and that source's standing.",
-  "version": "0.19.0",
+  "version": "0.19.1",
   "websiteUrl": "https://github.com/ogasurfproject-jpg/jhnrd",
   "repository": {
     "url": "https://github.com/ogasurfproject-jpg/jhnrd",

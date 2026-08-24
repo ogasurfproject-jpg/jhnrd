@@ -24,6 +24,7 @@ RULES = os.path.join(ROOT, "data", "rules_2024.json")
 DATAPACKAGE = os.path.join(ROOT, "datapackage.json")
 ZENODO = os.path.join(ROOT, ".zenodo.json")
 SERVER = os.path.join(ROOT, "server.json")
+RELEASE = os.path.join(ROOT, "mcp", "registry_release.json")
 
 # 公開MCPの居場所。ここを変えたら server.json も一緒に動く。
 MCP_URL = "https://jhnrd-mcp.oga-surf-project.workers.dev/mcp"
@@ -199,14 +200,24 @@ def build_server(n):
       レジストリの version は semver に従うことになっている。
       データの版は 2024-kaitei.seed.19 で、semver ではない。
       勝手に別の番号を振ると、どちらが本当か分からなくなるので、
-      seed 番号から機械的に 0.<seed>.0 を作る。数字は1つしか無い。
+      seed 番号から機械的に 0.<seed>.<patch> を作る。数字は1つしか無い。
       description は 100 文字まで、と schema が決めている。
+
+    patch がある理由 (2026-08-24):
+      レジストリは同じ版を二度受け取らない。
+      最初、版を 0.<seed>.0 に固定していたので、
+      「データは変わっていないが名刺が間違っていた」ときに直せなかった。
+      実際にそうなった(_meta の名前空間が違い、公開された名刺の _meta が {} だった)。
+      mcp/registry_release.json の patch を上げると、名刺だけ出し直せる。
+      for_seed が今の seed と違えば patch は 0 に戻る。手で辻褄を合わせなくてよい。
     """
     seed = str(n["version"]).split("seed.")[-1]
     try:
         seed_no = int(seed)
     except ValueError:
         seed_no = 0
+    rel = json.load(io.open(RELEASE, encoding="utf-8"))
+    patch = int(rel.get("patch", 0)) if int(rel.get("for_seed", -1)) == seed_no else 0
     desc = ("Japan home-visit nursing reimbursement rules, each with its source "
             "and that source's standing.")
     if len(desc) > 100:
@@ -215,7 +226,7 @@ def build_server(n):
         "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
         "name": "io.github.ogasurfproject-jpg/jhnrd",
         "description": desc,
-        "version": "0.%d.0" % seed_no,
+        "version": "0.%d.%d" % (seed_no, patch),
         "websiteUrl": REPO,
         "repository": {"url": REPO, "source": "github"},
         "remotes": [{"type": "streamable-http", "url": MCP_URL}],
