@@ -1752,9 +1752,17 @@
         {
           "url": "https://www.mhlw.go.jp/web/t_doc?dataId=82aa0253&dataType=0&pageNo=3",
           "got": "費目名(訪問介護費・訪問看護費…)は出てくるが、いずれも要件・基準の定義であって単位数表ではない。"
+        },
+        {
+          "url": "https://www.wam.go.jp/wamappl/bb05kaig.nsf/vAdmPBigcategory20/9254714B29B0B6E249256CE0002A4910?OpenDocument=",
+          "got": "WAM NET の告示第19号の掲載ページ。索引であって本文が無い。全文へのリンクも見当たらない。"
+        },
+        {
+          "url": "(検索) 『指定訪問看護ステーションの場合』『所要時間20分未満』など条文の言い回しで検索",
+          "got": "返ってくるのは PDF ばかり(mhlw の審議会資料・算定構造)。HTML の条文には当たらなかった。"
         }
       ],
-      "result": "別表『指定居宅サービス介護給付費単位数表』の dataId に到達できなかった。検索で出てくるのは PDF ばかりで、PDF の表は要約経由で読むと3回外している(conflicts: santei-kouzou-r8-yomitori)。同じ計器で測り直さない。",
+      "result": "別表『指定居宅サービス介護給付費単位数表』の dataId に到達できなかった。検索で出てくるのは PDF ばかりで、PDF の表は要約経由で読むと3回外している(conflicts: santei-kouzou-r8-yomitori)。同じ計器で測り直さない。 2026-08-24 追記: 法令等データベースの dataId・WAM NET・条文の言い回し検索の3通りを試して、いずれも別表本文に届かなかった。PDF は出てくるが、表を要約経由で読む計器は3回外しているので使わない。",
       "next_ideas": [
         "法令等データベースで別表そのものの dataId を特定する(医療側 mhlw-santei-houhou-genko は dataId=84aa9734 で条文が読めた)。",
         "e-Gov 法令検索の『指定居宅サービスに要する費用の額の算定に関する基準』本文(別表を含む)を当たる。",
