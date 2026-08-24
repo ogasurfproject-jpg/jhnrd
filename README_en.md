@@ -5,6 +5,7 @@
 [![validate](https://github.com/ogasurfproject-jpg/jhnrd/actions/workflows/validate.yml/badge.svg)](https://github.com/ogasurfproject-jpg/jhnrd/actions/workflows/validate.yml)
 [![live](https://github.com/ogasurfproject-jpg/jhnrd/actions/workflows/live.yml/badge.svg)](https://github.com/ogasurfproject-jpg/jhnrd/actions/workflows/live.yml)
 [![License: CC BY 4.0](https://img.shields.io/badge/license-CC%20BY%204.0-lightgrey.svg)](LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22083722.svg)](https://doi.org/10.5281/zenodo.22083722)
 
 A record of Japanese home-visit nursing reimbursement rules — additions, reductions, and the expiry of physician instructions — **in which every requirement carries the document it rests on.**
 
@@ -128,8 +129,10 @@ Full text, and what the maintainer can and cannot decide: **[GOVERNANCE.md](GOVE
 
 ```
 The HORIZONs Inc. (2026). JHNRD — Japan Home-visit Nursing Reimbursement Database,
-version 2024-kaitei.seed.19. https://github.com/ogasurfproject-jpg/jhnrd (CC BY 4.0)
+version 2024-kaitei.seed.19. Zenodo. https://doi.org/10.5281/zenodo.22083722 (CC BY 4.0)
 ```
+
+**DOI: [`10.5281/zenodo.22083722`](https://doi.org/10.5281/zenodo.22083722)** — this is the concept DOI covering all versions; it always resolves to the newest. **To cite a specific release, use the per-version DOI on its Zenodo record.** Different versions hold different content.
 
 Machine-readable descriptions — all generated from `status.json`, none written by hand:
 [`CITATION.cff`](CITATION.cff) ・ [`datapackage.json`](datapackage.json) ・ [`.zenodo.json`](.zenodo.json) ・ [`CHANGELOG.md`](CHANGELOG.md)

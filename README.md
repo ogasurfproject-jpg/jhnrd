@@ -10,6 +10,7 @@
 [![未確認の要件](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fogasurfproject-jpg%2Fjhnrd%2Fmain%2Fstatus.json&query=%24.unconfirmed_requirements&label=%E6%9C%AA%E7%A2%BA%E8%AA%8D%E3%81%AE%E8%A6%81%E4%BB%B6&color=e8590c&cacheSeconds=3600)](https://github.com/ogasurfproject-jpg/jhnrd/blob/main/status.json)
 [![未解決の食い違い](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fogasurfproject-jpg%2Fjhnrd%2Fmain%2Fstatus.json&query=%24.open_conflicts&label=%E6%9C%AA%E8%A7%A3%E6%B1%BA%E3%81%AE%E9%A3%9F%E3%81%84%E9%81%95%E3%81%84&color=c2255c&cacheSeconds=3600)](https://github.com/ogasurfproject-jpg/jhnrd/blob/main/status.json)
 [![License: CC BY 4.0](https://img.shields.io/badge/license-CC%20BY%204.0-lightgrey.svg)](LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22083722.svg)](https://doi.org/10.5281/zenodo.22083722)
 
 <sub>*A record of Japanese home-visit nursing reimbursement rules in which every requirement carries the document it rests on. Sources declare their own standing in three tiers, unconfirmed requirements are published as unconfirmed, and conflicting readings are kept side by side. It does not decide whether a claim may be billed. → [English](README_en.md)*</sub>
 
@@ -202,14 +203,18 @@ tools/test_live_workflow.py  1日1回の門(live.yml)の判定を、偽の本番
 
 ```
 The HORIZONs Inc. (2026). JHNRD — Japan Home-visit Nursing Reimbursement Database,
-version 2024-kaitei.seed.19. https://github.com/ogasurfproject-jpg/jhnrd (CC BY 4.0)
+version 2024-kaitei.seed.19. Zenodo. https://doi.org/10.5281/zenodo.22083722 (CC BY 4.0)
 ```
+
+**DOI: [`10.5281/zenodo.22083722`](https://doi.org/10.5281/zenodo.22083722)**
+
+この DOI は**すべての版をまとめて指すもの**（concept DOI）で、常に最新版へ解決します。**版を特定したいときは、Zenodo の各版のページにある版ごとの DOI を使ってください。** 版が違えば中身が違います。
 
 機械可読の記述は次のとおりです。**いずれも `status.json` から生成しており、手で書いていません。**
 
 | ファイル | 何か |
 | --- | --- |
-| [`CITATION.cff`](CITATION.cff) | 引用情報（GitHub の "Cite this repository" が読む） |
+| [`CITATION.cff`](CITATION.cff) | 引用情報（GitHub の "Cite this repository" が読む）。DOI 入り |
 | [`datapackage.json`](datapackage.json) | Frictionless Data Package。項目数・出典の内訳・利益相反を機械可読で持つ |
 | [`.zenodo.json`](.zenodo.json) | Zenodo 登録用。DOI を取るときの中身 |
 | [`server.json`](server.json) | 公式 MCP レジストリ用。版番号はデータの版から機械的に作る |

@@ -31,6 +31,11 @@ MCP_URL = "https://jhnrd-mcp.oga-surf-project.workers.dev/mcp"
 
 REPO = "https://github.com/ogasurfproject-jpg/jhnrd"
 ORCID = "0009-0000-9180-903X"
+
+# すべての版をまとめて指す DOI(concept DOI)。常に最新版へ解決する。
+# 版ごとの DOI は Zenodo が Release ごとに別に振るので、ここには書かない。
+# 「版が違えば中身が違う」以上、版を指したい人には版ごとの DOI を使ってもらう。
+DOI = "10.5281/zenodo.22083722"
 AFFIL = "The HORIZONs Inc. (法人番号 7021001075279)"
 
 KEYWORDS = ["訪問看護", "介護報酬", "診療報酬", "算定要件", "出典", "provenance",
@@ -109,7 +114,7 @@ def build_datapackage(n):
         "$schema": "https://datapackage.org/profiles/1.0/datapackage.json",
         "name": "jhnrd",
         "title": "JHNRD — Japan Home-visit Nursing Reimbursement Database",
-        "id": REPO,
+        "id": "https://doi.org/" + DOI,
         "version": n["version"],
         "description": desc_ja(n),
         "homepage": REPO,
@@ -163,6 +168,9 @@ def build_datapackage(n):
             "we_do_not_say": "算定できます・該当します、とは言わない。検査器が拒否する。",
             "conflict_of_interest": COI_JA,
             "governance": REPO + "/blob/main/GOVERNANCE.md",
+            "doi_concept": DOI,
+            "doi_note": "すべての版をまとめて指す DOI。版を特定したいときは、"
+                        "Zenodo の各版のページにある版ごとの DOI を使うこと。",
         },
     }
 
@@ -245,6 +253,7 @@ def build_server(n):
                     "算定の可否は判定しない。『算定できます』『該当します』を返さない。",
                 "conflict_of_interest": COI_EN,
                 "license": "CC-BY-4.0",
+                "doi_concept": DOI,
             }
         },
     }

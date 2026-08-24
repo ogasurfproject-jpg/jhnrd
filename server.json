@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.ogasurfproject-jpg/jhnrd",
   "description": "Japan home-visit nursing reimbursement rules, each with its source and that source's standing.",
-  "version": "0.19.1",
+  "version": "0.19.2",
   "websiteUrl": "https://github.com/ogasurfproject-jpg/jhnrd",
   "repository": {
     "url": "https://github.com/ogasurfproject-jpg/jhnrd",
@@ -22,7 +22,8 @@
       "open_conflicts": 0,
       "does_not_decide_billing": "算定の可否は判定しない。『算定できます』『該当します』を返さない。",
       "conflict_of_interest": "Conflict of interest: The HORIZONs Inc. sells a paid service to home-visit nursing providers that is backed by this database. Revenue comes only from those customers; no government, trade-association or vendor funding, no listing fees, no advertising. See GOVERNANCE.md.",
-      "license": "CC-BY-4.0"
+      "license": "CC-BY-4.0",
+      "doi_concept": "10.5281/zenodo.22083722"
     }
   }
 }

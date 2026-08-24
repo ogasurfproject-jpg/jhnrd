@@ -12,6 +12,14 @@ authors:
     orcid: "https://orcid.org/0009-0000-9180-903X"
     affiliation: "The HORIZONs Inc. (法人番号 7021001075279)"
 repository-code: "https://github.com/ogasurfproject-jpg/jhnrd"
+doi: "10.5281/zenodo.22083722"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.22083722"
+    description: >-
+      すべての版をまとめて指す DOI(concept DOI)。
+      版を特定したい場合は、Zenodo の各版のページにある版ごとの DOI を使うこと。
+      版が違えば中身が違う。
 license: CC-BY-4.0
 keywords:
   - 訪問看護

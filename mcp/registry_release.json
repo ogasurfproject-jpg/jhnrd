@@ -1,12 +1,17 @@
 {
   "for_seed": 19,
-  "patch": 1,
+  "patch": 2,
   "why": "レジストリは同じ版を二度受け取らない。データの版(seed)が動かないまま名刺だけを直したときは、ここの patch を1つ上げる。for_seed が今の seed と違えば patch は自動で 0 に戻る。版番号を二重に持ちたくないので、seed から作る形は変えない。",
   "history": [
     {
       "patch": 1,
       "at": "2026-08-24",
       "what": "_meta を io.modelcontextprotocol.registry/publisher-provided に移した。最初の publish では自分の名前空間に置いていて、レジストリに黙って捨てられ、公開された名刺の _meta は {} だった。"
+    },
+    {
+      "patch": 2,
+      "at": "2026-08-24",
+      "what": "DOI(10.5281/zenodo.22083722)を名刺に入れた。レジストリの一覧からしか見ない人にも、引用先が届くように。"
     }
   ]
 }
