@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+title: "JHNRD — Japan Home-visit Nursing Reimbursement Database"
+message: >-
+  このデータベースを使った場合は、版(seed 番号)を添えて引用してください。
+  版が違えば中身が違います。訂正しても元の記述を消さない方針のため、
+  どの版を見たかが分からないと、後から突き合わせられません。
+type: dataset
+authors:
+  - family-names: "Oga"
+    given-names: "Toshikatsu"
+    alias: "大賀 俊勝"
+    orcid: "https://orcid.org/0009-0000-9180-903X"
+    affiliation: "The HORIZONs Inc. (法人番号 7021001075279)"
+repository-code: "https://github.com/ogasurfproject-jpg/jhnrd"
+license: CC-BY-4.0
+keywords:
+  - 訪問看護
+  - 介護報酬
+  - 診療報酬
+  - 算定要件
+  - home-visit nursing
+  - long-term care insurance
+  - reimbursement
+  - Japan
+abstract: >-
+  訪問看護の減算・加算・指示書の期限について、要件と、その要件がどの資料に
+  基づくかを一つずつ記録したデータセット。数字そのものは公開情報であり、
+  ここが持っているのは「その数字がどこから来たのか」という記録である。
+  出典は statute(告示・省令・通知の原文) / agency(厚生労働省の資料) /
+  secondary(民間の解説) の三段階で素性を名乗り、現行版かどうかを別に持つ。
+  確認できていない要件は空欄にせず confirmed:false と理由を残す。
+  出典どうしが食い違ったときは、片方を選ばず両方を残す。
+  取りに行って取れなかった記録(attempts)と、読み取りが失敗した記録も公開する。
+  算定の可否は判定しない。
