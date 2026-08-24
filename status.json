@@ -1,10 +1,10 @@
 {
-  "version": "2024-kaitei.seed.9",
+  "version": "2024-kaitei.seed.10",
   "revision": "令和8年度改定(医療・介護とも令和8年6月施行)を現行とし、令和6年度改定で作った項目は当て直し待ちとして残している",
   "items": 30,
   "sources": {
     "statute": 6,
-    "agency": 6,
+    "agency": 7,
     "secondary": 3
   },
   "sources_not_current": 4,
