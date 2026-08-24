@@ -383,9 +383,30 @@ def main():
             sys.exit(2)
         print("\n検査: 緑")
         return
-    out = os.path.join(os.path.dirname(path), "..", "status.json")
+    out = os.path.abspath(os.path.join(os.path.dirname(path), "..", "status.json"))
+
+    # 2026-08-24: 日付だけで status.json が変わると、CI が別の日に赤くなる。
+    #   CI は validate.py を走らせたあと `git diff --exit-code -- status.json` を見る。
+    #   checked_at を毎回 today にしていたので、commit した日の翌日以降に押すと、
+    #   中身が1文字も変わっていなくても赤になった。
+    #   外から訂正を出す人の PR が、訂正と無関係な理由で赤くなるということである。
+    #   「訂正は不具合として扱う」と書いておいて、訂正を出しにくい門を立てていた。
+    #
+    #   なので、checked_at 以外が前と同じなら、前の日付を残す。
+    #   checked_at の意味は「最後に走らせた日」ではなく
+    #   「いまの状態が最後に変わった日」になる。走らせた日より、こちらのほうが要る。
     try:
-        io.open(os.path.abspath(out), "w", encoding="utf-8").write(
+        prev = json.load(io.open(out, encoding="utf-8"))
+    except Exception:
+        prev = None
+    if prev is not None:
+        a = {k: v for k, v in status.items() if k != "checked_at"}
+        b = {k: v for k, v in prev.items() if k != "checked_at"}
+        if a == b and prev.get("checked_at"):
+            status["checked_at"] = prev["checked_at"]
+
+    try:
+        io.open(out, "w", encoding="utf-8").write(
             json.dumps(status, ensure_ascii=False, indent=2) + "\n")
         print("\n状態を書いた: status.json")
     except Exception as e:
