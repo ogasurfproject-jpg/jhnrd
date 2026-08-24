@@ -83,15 +83,36 @@ def main():
     REG = "https://registry.modelcontextprotocol.io/v0/servers?search=jhnrd"
     server_json = json.load(io.open(os.path.join(ROOT, "server.json"), encoding="utf-8"))
 
-    def reg(version=None, meta=None):
+    def _row(version, meta, is_latest):
+        row = {"server": {
+            "name": "io.github.ogasurfproject-jpg/jhnrd",
+            "version": version,
+            "_meta": {"io.modelcontextprotocol.registry/publisher-provided": meta},
+        }}
+        if is_latest is not None:
+            row["_meta"] = {"io.modelcontextprotocol.registry/official":
+                            {"status": "active", "isLatest": is_latest}}
+        return row
+
+    def reg(version=None, meta=None, is_latest=True):
         m = {"conflict_of_interest": "Conflict of interest: ...", "license": "CC-BY-4.0"}
         if meta is not None:
             m = meta
-        return (200, json.dumps({"servers": [{"server": {
-            "name": "io.github.ogasurfproject-jpg/jhnrd",
-            "version": version or server_json["version"],
-            "_meta": {"io.modelcontextprotocol.registry/publisher-provided": m},
-        }}]}, ensure_ascii=False))
+        return (200, json.dumps({"servers": [
+            _row(version or server_json["version"], m, is_latest)]}, ensure_ascii=False))
+
+    def reg_many(is_latest=True):
+        """古い版が先に並んだ応答。実物の ?search= はこの形で返ってくる。
+
+        2026-08-25: これが無かったので、最初の1件(=一番古い版)を掴む誤りに
+          気づけなかった。版を上げるたびに本番が赤くなった。
+        """
+        m = {"conflict_of_interest": "Conflict of interest: ...", "license": "CC-BY-4.0"}
+        return (200, json.dumps({"servers": [
+            _row("0.19.0", {}, False if is_latest is not None else None),
+            _row("0.19.1", {}, False if is_latest is not None else None),
+            _row(server_json["version"], m, is_latest),
+        ]}, ensure_ascii=False))
 
     ok_items = (200, json.dumps(
         {"count": 1, "items": [{"id": "x"}],
@@ -139,6 +160,15 @@ def main():
          {"/status.json": live(), "/items": ok_items, "/mcp": (405, "{}")}, 0),
         ("レジストリに載っていて名刺も揃っている → 緑",
          {"/status.json": live(), "/items": ok_items, "/mcp": (405, "{}"), REG: reg()}, 0),
+        # 2026-08-25: レジストリは古い版を捨てない。?search= は全部の版を返し、
+        #   最初に来るのは一番古い版だった。最初の1件を掴んでいたので、
+        #   版を上げて publish するたびに、この門が「版が違う」と言って赤くなった。
+        ("古い版も一緒に並んで返ってくる → 最新版を見て緑",
+         {"/status.json": live(), "/items": ok_items, "/mcp": (405, "{}"),
+          REG: reg_many()}, 0),
+        ("どの版にも isLatest が無い → 版の大きいものを見て緑(警告のみ)",
+         {"/status.json": live(), "/items": ok_items, "/mcp": (405, "{}"),
+          REG: reg_many(is_latest=None)}, 0),
     ]
 
     fail, ran = 0, 0
@@ -153,7 +183,7 @@ def main():
             fail += 1
             print("       " + ((p.stdout or "") + (p.stderr or "")).strip()[:400].replace("\n", "\n       "))
 
-    EXPECT = 17  # 場面を足したら、ここも直すこと。数が合わないこと自体を赤にする。
+    EXPECT = 19  # 場面を足したら、ここも直すこと。数が合わないこと自体を赤にする。
     print("")
     print("確かめた数: %d 件" % ran)
     if ran != EXPECT:

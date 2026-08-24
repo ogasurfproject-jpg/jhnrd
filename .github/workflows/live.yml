@@ -128,12 +128,32 @@ jobs:
           elif reg_status != 200:
               print("::warning::レジストリが %d を返した" % reg_status)
           else:
+              # 2026-08-25: 名前が一致した最初の1件を取っていた。これが誤りだった。
+              #   レジストリは古い版を捨てないので、?search= は 0.19.0 も 0.19.1 も返す。
+              #   そして最初に来るのは一番古い版だった。
+              #   つまり版を上げて publish するたび、この門は
+              #   「レジストリに載っている版が違う」と言って赤くなった。
+              #   古い版を見て版違いを叫ぶのは、門ではなく誤報である。
+              #   いまは isLatest が付いている行を選ぶ。
+              rows = [r for r in (json.loads(reg_body).get("servers") or [])
+                      if ((r.get("server") or {}).get("name")
+                          == "io.github.ogasurfproject-jpg/jhnrd")]
               found = None
-              for row in (json.loads(reg_body).get("servers") or []):
-                  s = row.get("server") or {}
-                  if s.get("name") == "io.github.ogasurfproject-jpg/jhnrd":
-                      found = s
+              for r in rows:
+                  off = (r.get("_meta") or {}).get(
+                      "io.modelcontextprotocol.registry/official") or {}
+                  if off.get("isLatest") is True:
+                      found = r.get("server") or {}
                       break
+              if found is None and rows:
+                  # isLatest がどこにも付いていなければ、版の大きいものを見る。
+                  # 選んだこと自体を黙らない。
+                  def _vkey(r):
+                      v = str((r.get("server") or {}).get("version") or "")
+                      return [int(x) if x.isdigit() else -1 for x in v.split(".")]
+                  found = (max(rows, key=_vkey).get("server") or {})
+                  print("::warning::レジストリの応答に isLatest が無かったので、"
+                        "版の大きいもの(%s)を見た。" % found.get("version"))
               if not found:
                   bad.append("レジストリに io.github.ogasurfproject-jpg/jhnrd が見当たらない")
               else:
