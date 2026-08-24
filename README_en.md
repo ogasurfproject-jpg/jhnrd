@@ -67,7 +67,9 @@ These are not aspirations. `tools/validate.py` checks them mechanically, and **C
 
 ## Public MCP endpoint (no key, read-only)
 
-The dataset is served over MCP (JSON-RPC 2.0 at `POST /mcp`) and over plain HTTP
+**https://jhnrd-mcp.oga-surf-project.workers.dev**
+
+The dataset is served over MCP (JSON-RPC 2.0 / Streamable HTTP at `POST /mcp`) and over plain HTTP
 (`/status.json`, `/items`, `/items/<id>`, `/sources`, `/search?q=`, `/unconfirmed`,
 `/conflicts`, `/gaps`, `/disclosure`, `/cite`). **No key. No write path.**
 
@@ -82,7 +84,11 @@ The same line is drawn on the serving side:
 
 The copy it serves is generated from the dataset and **never fetched at runtime** — a CDN edge once kept a stale revision alive and an internal server handed out old numbers. **CI fails if the copy drifts from the source.**
 
-See [`mcp/README.md`](mcp/README.md).
+```json
+{ "mcpServers": { "jhnrd": { "type": "http", "url": "https://jhnrd-mcp.oga-surf-project.workers.dev/mcp" } } }
+```
+
+See [`mcp/README.md`](mcp/README.md); the registry manifest is [`server.json`](server.json).
 
 ---
 

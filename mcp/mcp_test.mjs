@@ -230,6 +230,10 @@ console.log("\n11) HTTP");
   const put = await http("PUT", "/items");
   check("書き込みの口は無い(405)", put.status === 405);
 
+  const getMcp = await http("GET", "/mcp");
+  check("GET /mcp は 405(404ではない)", getMcp.status === 405, String(getMcp.status));
+  check("405 のとき Allow を返す", getMcp.res.headers.get("allow") === "POST, OPTIONS");
+
   const nf = await http("GET", "/どこにもない");
   check("知らない道は 404", nf.status === 404);
 
@@ -239,7 +243,7 @@ console.log("\n11) HTTP");
 
 console.log("");
 // 確認や場面を足したら EXPECT も直すこと。数が合わないこと自体を赤にする。
-const EXPECT = 70;
+const EXPECT = 72;
 console.log("確かめた数: " + ran + " 件 (場面 11)");
 if (ran !== EXPECT) {
   console.log("確かめた数が " + EXPECT + " と合わない。"

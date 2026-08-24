@@ -23,6 +23,10 @@ STATUS = os.path.join(ROOT, "status.json")
 RULES = os.path.join(ROOT, "data", "rules_2024.json")
 DATAPACKAGE = os.path.join(ROOT, "datapackage.json")
 ZENODO = os.path.join(ROOT, ".zenodo.json")
+SERVER = os.path.join(ROOT, "server.json")
+
+# 公開MCPの居場所。ここを変えたら server.json も一緒に動く。
+MCP_URL = "https://jhnrd-mcp.oga-surf-project.workers.dev/mcp"
 
 REPO = "https://github.com/ogasurfproject-jpg/jhnrd"
 ORCID = "0009-0000-9180-903X"
@@ -188,6 +192,48 @@ def build_zenodo(n):
     }
 
 
+def build_server(n):
+    """公式の MCP レジストリに出す名刺。
+
+    版番号が2つになることについて:
+      レジストリの version は semver に従うことになっている。
+      データの版は 2024-kaitei.seed.19 で、semver ではない。
+      勝手に別の番号を振ると、どちらが本当か分からなくなるので、
+      seed 番号から機械的に 0.<seed>.0 を作る。数字は1つしか無い。
+      description は 100 文字まで、と schema が決めている。
+    """
+    seed = str(n["version"]).split("seed.")[-1]
+    try:
+        seed_no = int(seed)
+    except ValueError:
+        seed_no = 0
+    desc = ("Japan home-visit nursing reimbursement rules, each with its source "
+            "and that source's standing.")
+    if len(desc) > 100:
+        raise SystemExit("server.json の description が 100 文字を超えている: %d" % len(desc))
+    return {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+        "name": "io.github.ogasurfproject-jpg/jhnrd",
+        "description": desc,
+        "version": "0.%d.0" % seed_no,
+        "websiteUrl": REPO,
+        "repository": {"url": REPO, "source": "github"},
+        "remotes": [{"type": "streamable-http", "url": MCP_URL}],
+        "_meta": {
+            "io.github.ogasurfproject-jpg/jhnrd": {
+                "dataset_version": n["version"],
+                "items": n["items"],
+                "unconfirmed_requirements": n["unconfirmed_requirements"],
+                "open_conflicts": n["open_conflicts"],
+                "does_not_decide_billing":
+                    "算定の可否は判定しない。『算定できます』『該当します』を返さない。",
+                "conflict_of_interest": COI_EN,
+                "license": "CC-BY-4.0",
+            }
+        },
+    }
+
+
 def dump(obj):
     return json.dumps(obj, ensure_ascii=False, indent=2) + "\n"
 
@@ -196,7 +242,9 @@ def main():
     st = json.load(io.open(STATUS, encoding="utf-8"))
     json.load(io.open(RULES, encoding="utf-8"))  # 壊れていたらここで落とす
     n = numbers(st)
-    want = {DATAPACKAGE: dump(build_datapackage(n)), ZENODO: dump(build_zenodo(n))}
+    want = {DATAPACKAGE: dump(build_datapackage(n)),
+            ZENODO: dump(build_zenodo(n)),
+            SERVER: dump(build_server(n))}
 
     drift = []
     for path, text in want.items():
@@ -205,7 +253,7 @@ def main():
             drift.append(path)
 
     if not drift:
-        print("datapackage.json / .zenodo.json は status.json と一致しています。")
+        print("datapackage.json / .zenodo.json / server.json は status.json と一致しています。")
         return 0
     if "--write" in sys.argv:
         for path in drift:

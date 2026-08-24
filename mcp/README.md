@@ -1,9 +1,12 @@
 # JHNRD 公開MCP — 鍵なし・読み取り専用
 
+**https://jhnrd-mcp.oga-surf-project.workers.dev**
+
 このデータベースを、MCP と素の HTTP の両方で配ります。**鍵は要りません。書き込みの口はありません。**
 
 ```
-POST /mcp    MCP (JSON-RPC 2.0)
+POST /mcp    MCP (JSON-RPC 2.0 / Streamable HTTP)
+             ※GET /mcp は 405。server→client から先に話しかけることが無いので、SSE の受け口は開けていない
 GET  /       案内
 GET  /status.json  /items  /items/<id>  /sources  /sources/<id>
      /search?q=  /unconfirmed  /conflicts  /gaps  /disclosure  /cite
@@ -46,7 +49,7 @@ worker は**実行時に外へ取りに行きません。** 配るのは `rules.
 ## 動かす
 
 ```bash
-node mcp/mcp_test.mjs          # 試験（網は要らない。70件）
+node mcp/mcp_test.mjs          # 試験（網は要らない。72件）
 cd mcp && npx wrangler deploy  # 必ず mcp/ の中で打つこと
 ```
 
@@ -57,7 +60,7 @@ Claude Desktop / Claude Code などの MCP クライアントから:
 ```json
 {
   "mcpServers": {
-    "jhnrd": { "type": "http", "url": "https://<デプロイ先>/mcp" }
+    "jhnrd": { "type": "http", "url": "https://jhnrd-mcp.oga-surf-project.workers.dev/mcp" }
   }
 }
 ```
@@ -65,9 +68,19 @@ Claude Desktop / Claude Code などの MCP クライアントから:
 素の HTTP でも同じものが取れます。
 
 ```bash
-curl https://<デプロイ先>/status.json
-curl "https://<デプロイ先>/search?q=特別管理"
-curl https://<デプロイ先>/disclosure
+curl https://jhnrd-mcp.oga-surf-project.workers.dev/status.json
+curl "https://jhnrd-mcp.oga-surf-project.workers.dev/search?q=特別管理"
+curl https://jhnrd-mcp.oga-surf-project.workers.dev/disclosure
+```
+
+## 公式のレジストリに載せる
+
+`server.json` はリポジトリの根にあり、**中身は `status.json` から生成しています**（`tools/make_metadata.py`）。版番号もデータの版から機械的に作っています（seed 19 → `0.19.0`）。**版番号が二つに割れて、どちらが本当か分からなくなるのを避けるためです。**
+
+```bash
+# https://github.com/modelcontextprotocol/registry
+mcp-publisher login github        # io.github.ogasurfproject-jpg/... の名乗りを認証する
+mcp-publisher publish             # リポジトリ根の server.json を出す
 ```
 
 ---

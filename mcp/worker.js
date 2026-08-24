@@ -534,7 +534,7 @@ const INDEX =
   "版 " + DB.version + " / 項目 " + STATUS.items +
   " / 未確認の要件 " + STATUS.unconfirmed_requirements +
   " / 未解決の食い違い " + STATUS.open_conflicts + "\n\n" +
-  "MCP:  POST /mcp   (JSON-RPC 2.0)\n" +
+  "MCP:  POST /mcp   (JSON-RPC 2.0 / Streamable HTTP)  ※GET /mcp は 405\n" +
   "REST: GET /status.json  GET /items  GET /items/<id>  GET /sources  GET /sources/<id>\n" +
   "      GET /unconfirmed  GET /conflicts  GET /gaps  GET /disclosure  GET /cite\n\n" +
   WE_DO_NOT_SAY + "\n\n" + DISCLOSURE + "\n\n" + REPO + "\n";
@@ -586,6 +586,20 @@ export async function handle(request) {
   }
 
   if (request.method === "GET" || request.method === "HEAD") {
+    // Streamable HTTP では、GET /mcp は SSE の受け口である。
+    // ここは SSE を出さない(server→client から先に話しかけることが無いため)。
+    // 出さない実装は 404 ではなく 405 を返す、というのが作法。
+    // 404 だと「この口自体が無い」と読めてしまう。
+    if (path === "/mcp") {
+      return new Response(
+        JSON.stringify({
+          error: "GET /mcp では受けない。MCP は POST /mcp。",
+          note: "server→client から先に話しかけることが無いので、SSE の受け口は開けていない。",
+          index: "/",
+        }, null, 2),
+        { status: 405, headers: Object.assign(
+            { "content-type": "application/json; charset=utf-8", "allow": "POST, OPTIONS" }, CORS) });
+    }
     if (path === "/") {
       return new Response(INDEX, {
         headers: Object.assign({ "content-type": "text/plain; charset=utf-8" }, CORS),

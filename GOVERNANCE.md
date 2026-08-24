@@ -95,6 +95,17 @@ The HORIZONs株式会社（法人番号 7021001075279）
 - 引用するときは**版を添えてください**（`CITATION.cff` 参照）。訂正しても元を消さない方針のため、版が分からないと後から突き合わせられません。
 - 各版に annotated tag が打ってあります: `git tag -l 'seed.*'`
 
+### DOI（まだ取っていません）
+
+`.zenodo.json` は用意してあります（中身は `status.json` から生成）。取るなら手順は次のとおりです。
+
+1. Zenodo で GitHub 連携を開き、`ogasurfproject-jpg/jhnrd` を on にする
+2. GitHub で Release を切る（既存の `seed.N` tag から作れます）
+3. Zenodo が DOI を発行する。**版ごとの DOI と、全版をまとめる concept DOI の二つが出ます**
+4. `CITATION.cff` に `doi:` を足し、README にバッジを足す
+
+**取るまで、README に DOI があるかのように書きません。** 無いものを、あるように見せない。
+
 ---
 
 ## 6. 連絡先

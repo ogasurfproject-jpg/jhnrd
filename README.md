@@ -110,10 +110,12 @@ python3 tools/validate.py
 
 ## 公開MCP（鍵なし・読み取り専用）
 
+**https://jhnrd-mcp.oga-surf-project.workers.dev**
+
 このデータベースは、**MCP と素の HTTP の両方で配っています。鍵は要りません。書き込みの口はありません。**
 
 ```
-POST /mcp    MCP (JSON-RPC 2.0)
+POST /mcp    MCP (JSON-RPC 2.0 / Streamable HTTP)
 GET  /status.json  /items  /items/<id>  /sources  /search?q=
      /unconfirmed  /conflicts  /gaps  /disclosure  /cite
 ```
@@ -129,7 +131,19 @@ GET  /status.json  /items  /items/<id>  /sources  /search?q=
 
 配るデータ（`mcp/rules.data.js`）は本体からの生成物で、**実行時に外へ取りに行きません。** 一度、raw.githubusercontent の縁に古い版が残って、内部の MCP が古い数字を配ったためです。**写しが本体とずれたら CI が赤になります。**
 
-→ 詳細と繋ぎ方は **[`mcp/README.md`](mcp/README.md)**
+繋ぎ方:
+
+```json
+{ "mcpServers": { "jhnrd": { "type": "http", "url": "https://jhnrd-mcp.oga-surf-project.workers.dev/mcp" } } }
+```
+
+```bash
+curl https://jhnrd-mcp.oga-surf-project.workers.dev/status.json
+curl "https://jhnrd-mcp.oga-surf-project.workers.dev/search?q=特別管理"
+curl https://jhnrd-mcp.oga-surf-project.workers.dev/disclosure
+```
+
+→ 詳細と、公式レジストリへの載せ方は **[`mcp/README.md`](mcp/README.md)**（名刺は [`server.json`](server.json)）
 
 ---
 
@@ -144,7 +158,7 @@ tools/make_metadata.py    datapackage.json / .zenodo.json を生成（--check �
 tools/make_changelog.py   CHANGELOG.md を annotated tag から生成
 mcp/worker.js             公開MCP（鍵なし・読み取り専用）
 mcp/rules.data.js         公開MCPが配る写し（生成物。ずれたら CI が赤）
-mcp/mcp_test.mjs          公開MCPの試験（網は要らない。70件）
+mcp/mcp_test.mjs          公開MCPの試験（網は要らない。72件）
 tools/make_mcp_data.py    写しを本体から生成（--check を CI が見る）
 ```
 
@@ -192,6 +206,7 @@ version 2024-kaitei.seed.19. https://github.com/ogasurfproject-jpg/jhnrd (CC BY 
 | [`CITATION.cff`](CITATION.cff) | 引用情報（GitHub の "Cite this repository" が読む） |
 | [`datapackage.json`](datapackage.json) | Frictionless Data Package。項目数・出典の内訳・利益相反を機械可読で持つ |
 | [`.zenodo.json`](.zenodo.json) | Zenodo 登録用。DOI を取るときの中身 |
+| [`server.json`](server.json) | 公式 MCP レジストリ用。版番号はデータの版から機械的に作る |
 | [`CHANGELOG.md`](CHANGELOG.md) | 版ごとに何をどう直したか（annotated tag から生成） |
 
 各版には annotated tag が打ってあります。
