@@ -1,8 +1,8 @@
 {
   "dataset": "訪問看護 算定要件データベース",
   "purpose": "建設における JCCDB と同じ位置に立つ、外部の物差し。これが無ければ「取りこぼしがある」「減算の危険がある」は我々の感想にすぎない。",
-  "version": "2024-kaitei.seed.10",
-  "revision": "令和8年度改定(医療・介護とも令和8年6月施行)を現行とし、令和6年度改定で作った項目は当て直し待ちとして残している",
+  "version": "2024-kaitei.seed.11",
+  "revision": "令和8年度改定(医療・介護とも令和8年6月施行)を現行とする。令和6年度改定で作った介護の6項目(業務継続計画未策定減算・高齢者虐待防止措置未実施減算・准看護師・PT/OT/ST・特別管理加算・ターミナルケア加算)を令和8へ当て直した(令和8は処遇改善のみの臨時改定につき据え置きを確認: mhlw-r8-minaoshi-an)。特別管理加算(旧+574→(Ⅰ)500/(Ⅱ)250)とターミナルケア加算(旧+2,000→2,500)の取り違えを訂正し、緊急時訪問看護加算に(Ⅰ)600/(Ⅱ)574の候補を入れた。訂正値の出典は二次資料3件で一致・告示原本照合は残課題として confirmed:false のまま残す。",
   "built_at": "2026-08-24",
   "built_for": "内部MCP(業務データベース)および外向きMCPの裏付け",
   "discipline": [
@@ -57,17 +57,12 @@
         "note": "サービス類型で減算率が違う。訪問看護は『その他のサービス』側。二次資料だけを見ていたときは、この区別が手元に無かった。",
         "confirmed": true,
         "source_ref": [
-          "mhlw-001195261"
+          "mhlw-001195261",
+          "mhlw-r8-minaoshi-an"
         ],
-        "revision": "r6-kaigo",
-        "revision_recheck": {
-          "needed": true,
-          "why": "令和8年度介護報酬改定(令和8年6月施行)が出ている。この項目は令和6年度の資料で作った。額と要件が動いていないことを、令和8年6月施行版の資料で確かめるまで、現行の根拠にしない。",
-          "against": [
-            "mhlw-santei-kouzou-r8",
-            "mhlw-r8-kaigo-index"
-          ]
-        }
+        "revision": "r8-kaigo",
+        "carried_from": "r6-kaigo",
+        "carried_note": "令和8年度介護報酬改定は臨時改定で、諮問書別紙(mhlw-r8-minaoshi-an)に訪問看護費で新設として載るのは介護職員等処遇改善加算だけ。本項目は改定対象外で据え置き。2026-08-24に令和8へ当て直した。"
       },
       "timeline": {
         "obligation_from": "2024-04-01",
@@ -151,17 +146,12 @@
         "confirmed": true,
         "source_ref": [
           "mhlw-001195261",
-          "kaipoke-gyakutai"
+          "kaipoke-gyakutai",
+          "mhlw-r8-minaoshi-an"
         ],
-        "revision": "r6-kaigo",
-        "revision_recheck": {
-          "needed": true,
-          "why": "令和8年度介護報酬改定(令和8年6月施行)が出ている。この項目は令和6年度の資料で作った。額と要件が動いていないことを、令和8年6月施行版の資料で確かめるまで、現行の根拠にしない。",
-          "against": [
-            "mhlw-santei-kouzou-r8",
-            "mhlw-r8-kaigo-index"
-          ]
-        }
+        "revision": "r8-kaigo",
+        "carried_from": "r6-kaigo",
+        "carried_note": "令和8年度介護報酬改定は臨時改定で、諮問書別紙(mhlw-r8-minaoshi-an)に訪問看護費で新設として載るのは介護職員等処遇改善加算だけ。本項目は改定対象外で据え置き。2026-08-24に令和8へ当て直した。"
       },
       "timeline": {
         "applies_from": "2024-06-01",
@@ -266,17 +256,12 @@
         "value": "所定単位数に 98/100 を乗じる",
         "confirmed": true,
         "source_ref": [
-          "mhlw-001195509"
+          "mhlw-001195509",
+          "mhlw-santei-kouzou-r8"
         ],
-        "revision": "r6-kaigo",
-        "revision_recheck": {
-          "needed": true,
-          "why": "令和8年度介護報酬改定(令和8年6月施行)が出ている。この項目は令和6年度の資料で作った。額と要件が動いていないことを、令和8年6月施行版の資料で確かめるまで、現行の根拠にしない。",
-          "against": [
-            "mhlw-santei-kouzou-r8",
-            "mhlw-r8-kaigo-index"
-          ]
-        }
+        "revision": "r8-kaigo",
+        "carried_from": "r6-kaigo",
+        "carried_note": "令和8年6月施行の算定構造(mhlw-santei-kouzou-r8)に准看護師×98/100が現行値として載っている。据え置き。2026-08-24に令和8へ当て直した。"
       },
       "requirements": [
         {
@@ -300,17 +285,12 @@
         "value": "訪問看護費の算定構造上、－97単位",
         "confirmed": true,
         "source_ref": [
-          "mhlw-001195509"
+          "mhlw-001195509",
+          "mhlw-r8-minaoshi-an"
         ],
-        "revision": "r6-kaigo",
-        "revision_recheck": {
-          "needed": true,
-          "why": "令和8年度介護報酬改定(令和8年6月施行)が出ている。この項目は令和6年度の資料で作った。額と要件が動いていないことを、令和8年6月施行版の資料で確かめるまで、現行の根拠にしない。",
-          "against": [
-            "mhlw-santei-kouzou-r8",
-            "mhlw-r8-kaigo-index"
-          ]
-        }
+        "revision": "r8-kaigo",
+        "carried_from": "r6-kaigo",
+        "carried_note": "令和8年度介護報酬改定は臨時改定で、諮問書別紙(mhlw-r8-minaoshi-an)に訪問看護費で新設として載るのは介護職員等処遇改善加算だけ。本項目は改定対象外で据え置き。2026-08-24に令和8へ当て直した。"
       },
       "conflicts": [
         {
@@ -353,21 +333,19 @@
       "name": "特別管理加算",
       "effect": {
         "type": "単位",
-        "value": "訪問看護ステーションの場合 1月につき +574単位",
-        "value_clinic": "病院又は診療所の場合 1月につき +315単位",
-        "confirmed": true,
+        "value": "指定訪問看護ステーションの場合 (Ⅰ) 1月につき +500単位 /(Ⅱ) 1月につき +250単位",
+        "value_clinic": "病院又は診療所の場合の区分別単位数は今回未照合(旧値『+315単位』は要約読みで根拠が弱い)",
+        "confirmed": false,
         "source_ref": [
-          "mhlw-001195509"
+          "mhlw-001195509",
+          "ptotst-r6-houkan",
+          "arukunpo-2026-kaigo",
+          "kango-repo-kasan-2026"
         ],
-        "revision": "r6-kaigo",
-        "revision_recheck": {
-          "needed": true,
-          "why": "令和8年度介護報酬改定(令和8年6月施行)が出ている。この項目は令和6年度の資料で作った。額と要件が動いていないことを、令和8年6月施行版の資料で確かめるまで、現行の根拠にしない。",
-          "against": [
-            "mhlw-santei-kouzou-r8",
-            "mhlw-r8-kaigo-index"
-          ]
-        }
+        "revision": "r8-kaigo",
+        "unconfirmed_reason": "旧値『ステーション +574単位』は、緊急時訪問看護加算(Ⅱ)の574単位を隣の行から取り違えたもの(conflicts: santei-kouzou-r8-yomitori)。正しくは特別管理加算(Ⅰ)500単位/(Ⅱ)250単位。本DB内の名指し読み(同conflict claim_b)と、外部の二次資料3件(ptotst-r6-houkan・arukunpo-2026-kaigo・kango-repo-kasan-2026)がいずれも 500/250 で一致。ただし出典は agency の算定構造(要約読み)と二次資料であり、告示原本の名指し照合が済むまで confirmed にしない。",
+        "carried_from": "r6-kaigo",
+        "carried_note": "令和8年度介護報酬改定は臨時改定で、諮問書別紙(mhlw-r8-minaoshi-an)に訪問看護費で新設として載るのは介護職員等処遇改善加算だけ。本項目は改定対象外で据え置き。2026-08-24に令和8へ当て直した。"
       },
       "requirements": [
         {
@@ -390,21 +368,19 @@
       "name": "ターミナルケア加算",
       "effect": {
         "type": "単位",
-        "value": "+2,000単位",
+        "value": "+2,500単位",
         "condition_text": "死亡日及び死亡日前14日以内に2日以上ターミナルケアを行った場合",
-        "confirmed": true,
+        "confirmed": false,
         "source_ref": [
-          "mhlw-001195509"
+          "mhlw-001195509",
+          "ptotst-r6-houkan",
+          "arukunpo-2026-kaigo",
+          "kango-repo-kasan-2026"
         ],
-        "revision": "r6-kaigo",
-        "revision_recheck": {
-          "needed": true,
-          "why": "令和8年度介護報酬改定(令和8年6月施行)が出ている。この項目は令和6年度の資料で作った。額と要件が動いていないことを、令和8年6月施行版の資料で確かめるまで、現行の根拠にしない。",
-          "against": [
-            "mhlw-santei-kouzou-r8",
-            "mhlw-r8-kaigo-index"
-          ]
-        }
+        "revision": "r8-kaigo",
+        "unconfirmed_reason": "旧値『+2,000単位』(令和6構造の要約読み)および令和8構造の要約読み『+800単位』は、いずれも誤り。介護保険の訪問看護ターミナルケア加算は 2,500単位(死亡月)。外部の二次資料3件(ptotst-r6-houkan・arukunpo-2026-kaigo・kango-repo-kasan-2026)が 2,500単位で一致。告示原本の名指し照合が済むまで confirmed にしない。",
+        "carried_from": "r6-kaigo",
+        "carried_note": "令和8年度介護報酬改定は臨時改定で、諮問書別紙(mhlw-r8-minaoshi-an)に訪問看護費で新設として載るのは介護職員等処遇改善加算だけ。本項目は改定対象外で据え置き。2026-08-24に令和8へ当て直した。"
       },
       "requirements": [
         {
@@ -424,7 +400,8 @@
           "source_ref": [
             "mhlw-santei-kouzou-r8",
             "mhlw-001195509"
-          ]
+          ],
+          "resolved_toward": "2,500単位(2026-08-24, 外部の二次資料3件で一致)。+800/+2,000 は両読みとも誤りだった。"
         }
       ]
     },
@@ -475,15 +452,9 @@
       "sources": [
         "kna-q6"
       ],
-      "revision": "r6-iryo",
-      "revision_recheck": {
-        "needed": true,
-        "why": "令和8年度診療報酬改定(令和8年6月施行)が出ている。この項目は令和6年度の通知で作った。特別訪問看護指示書の14日・月1回(例外月2回)と、訪問看護指示書の有効期間6か月は令和8年度版でも同じ運用が確認できているが、原文で確かめ直すまで確定にしない。",
-        "against": [
-          "mhlw-r8-houkan-st",
-          "mhlw-santei-houhou-genko"
-        ]
-      }
+      "revision": "r8-iryo",
+      "carried_from": "r6-iryo",
+      "carried_note": "特別訪問看護指示書の交付(原則月1回・例外は気管カニューレ/真皮を越える褥瘡で月2回)と、訪問看護指示書の有効期間6か月は、令和8年度診療報酬改定でも見直しの記載が見当たらず、据え置きとして令和8へ当て直した(2026-08-24)。有効期間14日・6か月は原本の期限記載を取れていないため、個別ルールの confirmed:false はそのまま残す。"
     },
     {
       "id": "shiji-tsujo",
@@ -511,15 +482,9 @@
         "mhlw-r6-hohatsu12",
         "kouseikyoku-kinki-r6-shudan"
       ],
-      "revision": "r6-iryo",
-      "revision_recheck": {
-        "needed": true,
-        "why": "令和8年度診療報酬改定(令和8年6月施行)が出ている。この項目は令和6年度の通知で作った。特別訪問看護指示書の14日・月1回(例外月2回)と、訪問看護指示書の有効期間6か月は令和8年度版でも同じ運用が確認できているが、原文で確かめ直すまで確定にしない。",
-        "against": [
-          "mhlw-r8-houkan-st",
-          "mhlw-santei-houhou-genko"
-        ]
-      }
+      "revision": "r8-iryo",
+      "carried_from": "r6-iryo",
+      "carried_note": "特別訪問看護指示書の交付(原則月1回・例外は気管カニューレ/真皮を越える褥瘡で月2回)と、訪問看護指示書の有効期間6か月は、令和8年度診療報酬改定でも見直しの記載が見当たらず、据え置きとして令和8へ当て直した(2026-08-24)。有効期間14日・6か月は原本の期限記載を取れていないため、個別ルールの confirmed:false はそのまま残す。"
     },
     {
       "id": "iryo-kanri-shonichi",
@@ -1063,12 +1028,15 @@
       "name": "緊急時訪問看護加算(Ⅰ)(Ⅱ)",
       "effect": {
         "type": "単位",
-        "value": "単位数は未取得。1度目の読みで『(Ⅰ) 500単位 /(Ⅱ) 250単位』と出たが、2度目の読みでその値は特別管理加算のものだと出た。どちらとも決められない。",
+        "value": "指定訪問看護ステーションの場合 (Ⅰ) 1月につき +600単位 /(Ⅱ) 1月につき +574単位",
         "confirmed": false,
-        "unconfirmed_reason": "令和6年4月改定の表からは『緊急時訪問看護加算 1月につき +574単位(ステーションの場合)』と出た。ただし同じ読みで『特別管理加算 574単位』とも出ており、隣の行の値をそのまま持ってきた疑いがある。区分(Ⅰ)(Ⅱ)の別も出てこない。令和8年6月施行の表では『表に見当たらない』だった。確定できない。",
+        "unconfirmed_reason": "外部の二次資料3件(ptotst-r6-houkan・arukunpo-2026-kaigo・kango-repo-kasan-2026)がいずれも 緊急時訪問看護加算(Ⅰ)600単位/(Ⅱ)574単位 で一致。旧来の要約読みで『特別管理加算と入れ替わった』のは、574 が緊急時(Ⅱ)の値であることの裏返し(conflicts: santei-kouzou-r8-yomitori)。告示原本の名指し照合が済むまで confirmed にしない。",
         "source_ref": [
           "mhlw-001195509",
-          "mhlw-santei-kouzou-r8"
+          "mhlw-santei-kouzou-r8",
+          "ptotst-r6-houkan",
+          "arukunpo-2026-kaigo",
+          "kango-repo-kasan-2026"
         ],
         "revision": "r8-kaigo"
       },
@@ -1676,6 +1644,33 @@
       "current": true,
       "retrieved_at": "2026-08-24",
       "note": "諮問書の別紙。表紙に『案』とある。訪問看護費について載っているのは介護職員等処遇改善加算(新設)だけで、他の加算の単位数の見直しは出てこない。"
+    },
+    "ptotst-r6-houkan": {
+      "title": "訪問看護(令和6年度介護報酬改定)",
+      "publisher": "PT-OT-ST.NET",
+      "url": "https://www.pt-ot-st.net/contents4/nursing-care-reiwa-6/?page_id=5735",
+      "tier": "secondary",
+      "current": true,
+      "retrieved_at": "2026-08-24",
+      "note": "訪問看護費(介護・ステーション)の基本単位数と加算。基本 20分未満314/30分未満471/1時間未満823/1時間30分未満1,128単位、緊急時(Ⅰ)600/(Ⅱ)574、特別管理(Ⅰ)500/(Ⅱ)250、ターミナルケア加算2,500単位。"
+    },
+    "arukunpo-2026-kaigo": {
+      "title": "2026年(令和8年)6月改定 訪問看護 介護保険の料金表まとめ",
+      "publisher": "あるく報",
+      "url": "https://arukunpo.com/2026-6-1kaigo/",
+      "tier": "secondary",
+      "current": true,
+      "retrieved_at": "2026-08-24",
+      "note": "2026年6月改定反映。基本料金・各種加算は据え置き、新設は介護職員等処遇改善加算(月合計×1.8%)と明記。要介護 基本314/471/823/1,128、特別管理(Ⅰ)500/(Ⅱ)250、ターミナル2,500、退院時共同指導600、初回350。"
+    },
+    "kango-repo-kasan-2026": {
+      "title": "訪問看護 加算一覧【2026年改定対応】介護・医療保険の全加算",
+      "publisher": "看護レポ",
+      "url": "https://kango-repo.com/blog/houmon-kango-kasan-ichiran",
+      "tier": "secondary",
+      "current": true,
+      "retrieved_at": "2026-08-24",
+      "note": "介護の加算単位数一覧。緊急時(Ⅰ)600/(Ⅱ)574、特別管理(Ⅰ)500/(Ⅱ)250、ターミナル2,500、初回(Ⅰ)350/(Ⅱ)300、看護体制強化(Ⅰ)550/(Ⅱ)200、退院時共同指導600。"
     }
   },
   "attempts": [
@@ -1738,7 +1733,34 @@
       "url": "https://www.mhlw.go.jp/content/12300000/001633494.pdf",
       "at": "2026-08-24",
       "result": "訪問看護費について載っているのは介護職員等処遇改善加算(新設)だけだった。他の加算の単位数の見直しは、この資料には出てこない。『令和8年で訪問看護費の加算は動いていない可能性が高い』という手がかりにはなるが、基本単位数が二つの表で 313/314 と違って読めたことと噛み合わない。両方まだ未解決。",
-      "next": "令和8年6月施行の告示そのもの(介護保険最新情報)に当たる。"
+      "next": "令和8年6月施行の告示そのもの(介護保険最新情報)に当たる。",
+      "resolved_2026_08_24": "『313/314 と噛み合わない』は決着した。令和8年度介護報酬改定は臨時改定(施行 令和8年6月1日)で、訪問看護に入るのは介護職員等処遇改善加算(加算率1.8%)の新設のみ。基本単位数・各種加算は据え置きで、現行は 314/471/823/1,128(令和6年度の値がそのまま継続)。313/470/821/1,125 は令和6年度より前の値の取り違えだった。出典: ptotst-r6-houkan・arukunpo-2026-kaigo(『基本料金・各種加算は据え置き、新設は処遇改善加算』と明記)。"
+    },
+    {
+      "at": "2026-08-24",
+      "looking_for": "介護保険の単位数の告示原文(指定居宅サービスに要する費用の額の算定に関する基準・平成12年厚生省告示第19号 別表『指定居宅サービス介護給付費単位数表』3 訪問看護費)を、表ではなく条文として読むこと。特別管理加算・緊急時訪問看護加算・ターミナルケア加算を statute 出典に格上げするため。",
+      "why_it_matters": "これらの単位数は現在 secondary 3件の一致でしか裏づけていない。告示の条文に当たれば confirmed:true に上げられる。医療側は法令等データベースの HTML(mhlw-santei-houhou-genko)で条文が読めており、介護側にも同じ道があるはずだった。",
+      "tried": [
+        {
+          "url": "https://www.mhlw.go.jp/web/t_doc?dataId=82aa0253&dataType=0&pageNo=1",
+          "got": "検索結果は告示第19号として出たが、開くと『厚生労働大臣が定める基準に適合する利用者等』だった。単位数表の別表ではない。"
+        },
+        {
+          "url": "https://www.mhlw.go.jp/web/t_doc?dataId=82aa0253&dataType=0&pageNo=2",
+          "got": "同上。末尾は附則(令和6年11月21日厚生労働省告示第338号)。別表なし。"
+        },
+        {
+          "url": "https://www.mhlw.go.jp/web/t_doc?dataId=82aa0253&dataType=0&pageNo=3",
+          "got": "費目名(訪問介護費・訪問看護費…)は出てくるが、いずれも要件・基準の定義であって単位数表ではない。"
+        }
+      ],
+      "result": "別表『指定居宅サービス介護給付費単位数表』の dataId に到達できなかった。検索で出てくるのは PDF ばかりで、PDF の表は要約経由で読むと3回外している(conflicts: santei-kouzou-r8-yomitori)。同じ計器で測り直さない。",
+      "next_ideas": [
+        "法令等データベースで別表そのものの dataId を特定する(医療側 mhlw-santei-houhou-genko は dataId=84aa9734 で条文が読めた)。",
+        "e-Gov 法令検索の『指定居宅サービスに要する費用の額の算定に関する基準』本文(別表を含む)を当たる。",
+        "令和8年厚生労働省告示第87号(改正告示)の本文を介護保険最新情報から取り、改正箇所として単位数を読む。",
+        "PDF は要約経由で読まず、該当ページを画像として見る。"
+      ]
     }
   ],
   "attempts_note": "取りに行って取れなかったものの記録。出典の一覧には取れたものしか載らないので、ここが無いと、次に調べる人が同じ道を同じ順で辿って同じところで止まる。",
@@ -2071,7 +2093,7 @@
   "conflicts": [
     {
       "about": "santei-kouzou-r8-yomitori",
-      "status": "未解決",
+      "status": "方向は外部照合で確定・原本照合は残課題",
       "what": "同じ PDF(令和8年6月施行の算定構造)を二度読ませたところ、緊急時訪問看護加算と特別管理加算の単位数が入れ替わって出た。",
       "claim_a": {
         "text": "緊急時訪問看護加算(Ⅰ) 500単位 /(Ⅱ) 250単位。特別管理加算は区分なしで 600単位。",
@@ -2096,7 +2118,16 @@
           "mhlw-001195509"
         ]
       },
-      "what_it_means": "同じ取り違えが、別の資料でも起きた。つまりこれは、ある1つの資料に固有の問題ではなく、『PDF の表を要約経由で読む』という測り方そのものの問題である。計器の問題であって、測られたものの問題ではない。この測り方で取った単位数は、二つ以上の資料で一致したときにだけ確定にする。"
+      "what_it_means": "同じ取り違えが、別の資料でも起きた。つまりこれは、ある1つの資料に固有の問題ではなく、『PDF の表を要約経由で読む』という測り方そのものの問題である。計器の問題であって、測られたものの問題ではない。この測り方で取った単位数は、二つ以上の資料で一致したときにだけ確定にする。",
+      "resolution": {
+        "at": "2026-08-24",
+        "text": "外部の二次資料3件(ptotst-r6-houkan 令和6・arukunpo-2026-kaigo・kango-repo-kasan-2026)を1項目ずつ照合したところ、緊急時訪問看護加算(Ⅰ)600単位/(Ⅱ)574単位、特別管理加算(Ⅰ)500単位/(Ⅱ)250単位 で、3件とも一致した。取り違えの向きが確定した(574は緊急時(Ⅱ)の値、500/250は特別管理の値)。claim_b(名指し読み)の特別管理500/250とも一致する。ただし出典は二次資料であり、告示原本(算定構造の原本)の名指し照合は残課題。該当項目(kasan-tokubetsu-kanri・kaigo-kasan-kinkyuji)の値は訂正したが confirmed:false のまま残す。",
+        "source_ref": [
+          "ptotst-r6-houkan",
+          "arukunpo-2026-kaigo",
+          "kango-repo-kasan-2026"
+        ]
+      }
     }
   ],
   "conflicts_note": "出典どうし、あるいは同じ出典の読み取りどうしが食い違ったときに残す。どちらかを選んで黙らない。選んだ瞬間に、選んだ理由が消える。"
