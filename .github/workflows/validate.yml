@@ -16,6 +16,13 @@ jobs:
           python-version: "3.12"
       - name: run the validator
         run: python3 tools/validate.py
+      - name: the README numbers must match status.json
+        run: |
+          python3 tools/update_readme.py --check || {
+            echo "README numbers are out of step with status.json."
+            echo "Run python3 tools/update_readme.py --write and commit README.md too."
+            exit 1
+          }
       - name: status.json must match the data
         run: |
           git diff --exit-code -- status.json || {
