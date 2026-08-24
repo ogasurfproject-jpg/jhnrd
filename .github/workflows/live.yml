@@ -2,16 +2,27 @@ name: live
 
 # 押したのに配っていない、を見つけるための門。
 #
-# 2026-08-24 に実際に起きたこと:
+# 2026-08-24 に実際に起きたこと(1):
 #   worker のコードを直して push したが、wrangler deploy を打ち忘れていた。
 #   リポジトリは新しく、本番は古い。CI は緑。誰も気づかない。
 #   同じことが内部MCPで二度あった(古い写しを配りつづけた)。
 #
-# なので、本番に出ている版を、リポジトリの版と突き合わせる。
+# 2026-08-24 に実際に起きたこと(2):
+#   この門を立てた最初の版が、GitHub の走者から HTTP 403 を受け取っていた。
+#   「届かなかった」を一律で警告扱い(緑)にしていたので、
+#   門は一度も何も確かめないまま、毎日緑を出しつづける形になっていた。
+#   門があると皆が思っている場所に、門が無い。今夜これを4回見た。5回目である。
+#
+#   直した点は二つ。
+#     ・名乗る(User-Agent)。名無しの urllib は撥ねられる。
+#     ・「届かなかった」を二つに割る。
+#         HTTP で番号が返った = 届いている。向こうが答えた。これは答えである。
+#           200 以外なら赤。公開の口が公開を拒むのは、直すべきことなので。
+#         接続そのものが立たない = 届いていない。こちらは警告のみ。
+#           届かないことは、古いことの証拠にならない。
 #
 # push では走らせない。押した直後はまだ配っていないのが当たり前で、
 # そこで赤くすると「赤いのが普通」になり、門が門でなくなるため。
-# 1日1回と、手で叩いたときだけ。
 
 on:
   schedule:
@@ -26,32 +37,59 @@ jobs:
       - name: what the live endpoint is actually serving
         run: |
           python3 - <<'PY'
-          import json, sys, time, urllib.request
+          import json, os, sys, time, urllib.error, urllib.request
 
           URL = "https://jhnrd-mcp.oga-surf-project.workers.dev"
+          UA = "jhnrd-live-check/1.0 (+https://github.com/ogasurfproject-jpg/jhnrd)"
           want = json.load(open("status.json", encoding="utf-8"))
+          # 試験から待ち時間を潰せるようにしておく(tools/test_live_workflow.py)。
+          # 待つのは本番に当たるときだけでよい。
+          RETRY_SLEEP = float(os.environ.get("JHNRD_LIVE_RETRY_SLEEP", "3"))
 
-          def get(path, tries=3):
+          def get_abs(url, tries=3):
+              """(status, body, unreachable_reason) を返す。
+
+              番号が返ってきたら、それは答えである(status を入れる)。
+              接続が立たなかったときだけ unreachable_reason を入れる。
+              """
               last = None
               for i in range(tries):
+                  req = urllib.request.Request(
+                      url, headers={"user-agent": UA, "accept": "application/json"})
                   try:
-                      with urllib.request.urlopen(URL + path, timeout=20) as r:
-                          return r.status, r.read().decode("utf-8")
+                      with urllib.request.urlopen(req, timeout=20) as r:
+                          return r.status, r.read().decode("utf-8"), None
+                  except urllib.error.HTTPError as e:
+                      body = ""
+                      try:
+                          body = e.read().decode("utf-8", "replace")
+                      except Exception:
+                          pass
+                      return e.code, body, None
                   except Exception as e:
                       last = e
-                      time.sleep(3 * (i + 1))
-              return None, str(last)
+                      time.sleep(RETRY_SLEEP * (i + 1))
+              return None, None, str(last)
 
-          # 届かないことと、届いて中身が違うことは、別の事実である。
-          # 届かないのは向こうの都合かもしれないので、赤にはしない。
-          status, body = get("/status.json")
-          if status is None:
-              print("::warning::本番に届かなかった: %s" % body)
-              print("届かないことは、古いことの証拠にはならない。ここでは止めない。")
+          def get(path, tries=3):
+              return get_abs(URL + path, tries)
+
+          status, body, unreachable = get("/status.json")
+          if unreachable is not None:
+              print("::warning::本番に接続できなかった: %s" % unreachable)
+              print("接続が立たないことは、古いことの証拠にならない。ここでは止めない。")
               sys.exit(0)
 
-          live = json.loads(body)
           bad = []
+          if status != 200:
+              print("公開の口が %d を返した。" % status)
+              print((body or "")[:400])
+              print("")
+              print("番号が返っている以上、向こうは答えている。届かなかったのではない。")
+              print("公開の口が公開を拒んでいるなら、それは直すべきことである。")
+              sys.exit(1)
+
+          live = json.loads(body)
 
           if live.get("version") != want.get("version"):
               bad.append("配っている版が違う: 本番=%s / リポジトリ=%s"
@@ -66,8 +104,8 @@ jobs:
               bad.append("応答に『算定の可否は判定しない』が入っていない")
 
           # 断定を返していないか、本番で直に確かめる。
-          s2, b2 = get("/items")
-          if s2 is not None:
+          s2, b2, u2 = get("/items")
+          if u2 is None and s2 == 200:
               d2 = json.loads(b2)
               strip = json.dumps(d2, ensure_ascii=False)
               for m in ("『算定できます』", "「算定できます」", "『該当します』", "「該当します」"):
@@ -76,9 +114,42 @@ jobs:
               for w in ("算定できます", "該当します"):
                   if w in strip:
                       bad.append("本番が断定を返している: %s" % w)
+          elif u2 is None:
+              bad.append("/items が %d を返した" % s2)
 
-          s3, _ = get("/mcp")
-          if s3 is not None and s3 != 405:
+          # 公式レジストリに載っている名刺も見る。
+          #   「載せた」と「載った」は別のことである。
+          #   最初の publish では _meta が丸ごと捨てられていて、公開された名刺は {} だった。
+          #   打ったコマンドが成功と言ったことは、載ったことの証拠にならない。
+          reg_status, reg_body, reg_unreachable = get_abs(
+              "https://registry.modelcontextprotocol.io/v0/servers?search=jhnrd")
+          if reg_unreachable is not None:
+              print("::warning::レジストリに接続できなかった: %s" % reg_unreachable)
+          elif reg_status != 200:
+              print("::warning::レジストリが %d を返した" % reg_status)
+          else:
+              found = None
+              for row in (json.loads(reg_body).get("servers") or []):
+                  s = row.get("server") or {}
+                  if s.get("name") == "io.github.ogasurfproject-jpg/jhnrd":
+                      found = s
+                      break
+              if not found:
+                  bad.append("レジストリに io.github.ogasurfproject-jpg/jhnrd が見当たらない")
+              else:
+                  wantver = json.load(open("server.json", encoding="utf-8"))["version"]
+                  if found.get("version") != wantver:
+                      bad.append("レジストリに載っている版が違う: 載っている=%s / リポジトリ=%s"
+                                 " (cd ~/Desktop/jhnrd && mcp-publisher publish)"
+                                 % (found.get("version"), wantver))
+                  meta = (found.get("_meta") or {}).get(
+                      "io.modelcontextprotocol.registry/publisher-provided") or {}
+                  if "conflict_of_interest" not in meta:
+                      bad.append("レジストリに載っている名刺に利益相反が入っていない"
+                                 "(名前空間が違うと黙って捨てられる)")
+
+          s3, _b3, u3 = get("/mcp")
+          if u3 is None and s3 != 405:
               print("::warning::GET /mcp が %s を返した(405 のはず)" % s3)
 
           if bad:

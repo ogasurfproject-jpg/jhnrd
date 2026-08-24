@@ -9,9 +9,12 @@
   だから、その判定だけを取り出して、偽の本番を7通り与えて確かめる。
   ここは毎回の CI で走る。網に繋がない(偽の本番は urlopen を差し替えて作る)。
 
-  特に確かめたいのは「届かないとき赤にしない」ことである。
-  届かないことは、古いことの証拠にならない。
-  そこを赤にすると、向こうの都合でこちらが赤くなり、赤が普通になって門が門でなくなる。
+  特に確かめたいのは、「届かなかった」の二つの意味を取り違えていないことである。
+    接続が立たない = 届いていない → 警告のみ。届かないことは、古いことの証拠にならない。
+    HTTP の番号が返った = 届いている。向こうが答えた → 200 以外なら赤。
+
+  最初の版はここを一括りにしていた。GitHub の走者から 403 が返っていたのに、
+  それを「届かなかった」として毎日緑を出していた。門があると皆が思っている場所に、門が無い。
 
 使い方:
   python3 tools/test_live_workflow.py
@@ -34,18 +37,28 @@ def extract():
     return "\n".join(l[indent:] if len(l) >= indent else l for l in body.split("\n"))
 
 
+# 偽の本番。urlopen を差し替えて作る。網には繋がない。
+#   MAP に載っていない道 → 接続が立たない(OSError)。届いていない。
+#   200 以外 → urllib と同じく HTTPError を投げる。届いて、向こうが答えた。
 HARNESS = """
-import json, sys, urllib.request
+import json, os, sys, urllib.error, urllib.request
+os.environ["JHNRD_LIVE_RETRY_SLEEP"] = "0"
 MAP = json.loads(%r)
 class _R:
     def __init__(s, st, b): s.status = st; s._b = b
     def read(s): return s._b.encode("utf-8")
     def __enter__(s): return s
     def __exit__(s, *a): return False
-def _open(url, timeout=0):
-    p = url.split("workers.dev", 1)[1]
-    if p not in MAP: raise OSError("unreachable " + p)
-    st, body = MAP[p]
+class _Fp:
+    def __init__(s, b): s._b = b
+    def read(s): return s._b.encode("utf-8")
+def _open(req, timeout=0):
+    url = getattr(req, "full_url", req)
+    key = url.split("workers.dev", 1)[1] if "workers.dev" in url else url
+    if key not in MAP: raise OSError("connection refused " + key)
+    st, body = MAP[key]
+    if st != 200:
+        raise urllib.error.HTTPError(url, st, "err", {}, _Fp(body))
     return _R(st, body)
 urllib.request.urlopen = _open
 """
@@ -66,6 +79,19 @@ def main():
         }
         d.update(over)
         return (200, json.dumps(d, ensure_ascii=False))
+
+    REG = "https://registry.modelcontextprotocol.io/v0/servers?search=jhnrd"
+    server_json = json.load(io.open(os.path.join(ROOT, "server.json"), encoding="utf-8"))
+
+    def reg(version=None, meta=None):
+        m = {"conflict_of_interest": "Conflict of interest: ...", "license": "CC-BY-4.0"}
+        if meta is not None:
+            m = meta
+        return (200, json.dumps({"servers": [{"server": {
+            "name": "io.github.ogasurfproject-jpg/jhnrd",
+            "version": version or server_json["version"],
+            "_meta": {"io.modelcontextprotocol.registry/publisher-provided": m},
+        }}]}, ensure_ascii=False))
 
     ok_items = (200, json.dumps(
         {"count": 1, "items": [{"id": "x"}],
@@ -89,9 +115,30 @@ def main():
          {"/status.json": live(we_do_not_say=""), "/items": ok_items, "/mcp": (405, "{}")}, 1),
         ("本番が断定を返した → 赤",
          {"/status.json": live(), "/items": bad_items, "/mcp": (405, "{}")}, 1),
-        ("本番に届かない → 緑(警告のみ)。届かないことは古いことの証拠にならない", {}, 0),
+        ("接続が立たない → 緑(警告のみ)。届かないことは古いことの証拠にならない", {}, 0),
+        # 2026-08-24: ここが無かったせいで、門は403を受け取りながら毎日緑を出していた。
+        ("本番が 403 を返す(届いている・拒まれた) → 赤",
+         {"/status.json": (403, "Forbidden"), "/items": ok_items, "/mcp": (405, "{}")}, 1),
+        ("本番が 500 を返す → 赤",
+         {"/status.json": (500, "boom"), "/items": ok_items, "/mcp": (405, "{}")}, 1),
+        ("/items だけ 403 → 赤",
+         {"/status.json": live(), "/items": (403, "Forbidden"), "/mcp": (405, "{}")}, 1),
         ("GET /mcp が 404 → 警告だけで緑",
          {"/status.json": live(), "/items": ok_items, "/mcp": (404, "{}")}, 0),
+        ("レジストリに載っている版が古い → 赤",
+         {"/status.json": live(), "/items": ok_items, "/mcp": (405, "{}"),
+          REG: reg(version="0.18.0")}, 1),
+        # 2026-08-24: 最初の publish は _meta を丸ごと捨てられ、公開された名刺は {} だった。
+        ("レジストリの名刺から利益相反が消えている → 赤",
+         {"/status.json": live(), "/items": ok_items, "/mcp": (405, "{}"),
+          REG: reg(meta={})}, 1),
+        ("レジストリに載っていない → 赤",
+         {"/status.json": live(), "/items": ok_items, "/mcp": (405, "{}"),
+          REG: (200, json.dumps({"servers": []}))}, 1),
+        ("レジストリに接続できない → 緑(警告のみ)",
+         {"/status.json": live(), "/items": ok_items, "/mcp": (405, "{}")}, 0),
+        ("レジストリに載っていて名刺も揃っている → 緑",
+         {"/status.json": live(), "/items": ok_items, "/mcp": (405, "{}"), REG: reg()}, 0),
     ]
 
     fail, ran = 0, 0
@@ -106,7 +153,7 @@ def main():
             fail += 1
             print("       " + ((p.stdout or "") + (p.stderr or "")).strip()[:400].replace("\n", "\n       "))
 
-    EXPECT = 9  # 場面を足したら、ここも直すこと。数が合わないこと自体を赤にする。
+    EXPECT = 17  # 場面を足したら、ここも直すこと。数が合わないこと自体を赤にする。
     print("")
     print("確かめた数: %d 件" % ran)
     if ran != EXPECT:

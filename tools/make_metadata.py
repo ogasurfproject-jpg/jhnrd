@@ -219,8 +219,13 @@ def build_server(n):
         "websiteUrl": REPO,
         "repository": {"url": REPO, "source": "github"},
         "remotes": [{"type": "streamable-http", "url": MCP_URL}],
+        # 2026-08-24: ここは最初 "io.github.ogasurfproject-jpg/jhnrd" という
+        #   自分の名前空間に置いていた。レジストリはそれを黙って捨て、
+        #   公開された名刺の _meta は {} になっていた。
+        #   schema が受け取ると決めているのは、この名前空間だけである。
+        #   「載せた」と「載った」は別のことで、確かめるまでは前者しか言えない。
         "_meta": {
-            "io.github.ogasurfproject-jpg/jhnrd": {
+            "io.modelcontextprotocol.registry/publisher-provided": {
                 "dataset_version": n["version"],
                 "items": n["items"],
                 "unconfirmed_requirements": n["unconfirmed_requirements"],

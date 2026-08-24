@@ -15,7 +15,7 @@
     }
   ],
   "_meta": {
-    "io.github.ogasurfproject-jpg/jhnrd": {
+    "io.modelcontextprotocol.registry/publisher-provided": {
       "dataset_version": "2024-kaitei.seed.19",
       "items": 33,
       "unconfirmed_requirements": 48,
