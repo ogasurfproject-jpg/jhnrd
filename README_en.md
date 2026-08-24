@@ -3,6 +3,7 @@
 **Japan Home-visit Nursing Reimbursement Database**
 
 [![validate](https://github.com/ogasurfproject-jpg/jhnrd/actions/workflows/validate.yml/badge.svg)](https://github.com/ogasurfproject-jpg/jhnrd/actions/workflows/validate.yml)
+[![live](https://github.com/ogasurfproject-jpg/jhnrd/actions/workflows/live.yml/badge.svg)](https://github.com/ogasurfproject-jpg/jhnrd/actions/workflows/live.yml)
 [![License: CC BY 4.0](https://img.shields.io/badge/license-CC%20BY%204.0-lightgrey.svg)](LICENSE)
 
 A record of Japanese home-visit nursing reimbursement rules — additions, reductions, and the expiry of physician instructions — **in which every requirement carries the document it rests on.**
@@ -83,6 +84,8 @@ The same line is drawn on the serving side:
 - **The tools that expose the weaknesses come first**: `jhnrd_unconfirmed`, `jhnrd_gaps` (including searches that came back empty), `jhnrd_conflicts` (both readings kept).
 
 The copy it serves is generated from the dataset and **never fetched at runtime** — a CDN edge once kept a stale revision alive and an internal server handed out old numbers. **CI fails if the copy drifts from the source.**
+
+Once a day, the version the live endpoint is actually serving is compared against the repository (the `live` badge above) — because pushing and forgetting to deploy has already happened here once. That check **does not fail when the endpoint is unreachable**: being unreachable is not evidence of being stale. And the check's own logic is exercised against nine mocked endpoints on every push, since a gate that runs once a day can stay broken for a day without anyone knowing.
 
 ```json
 { "mcpServers": { "jhnrd": { "type": "http", "url": "https://jhnrd-mcp.oga-surf-project.workers.dev/mcp" } } }

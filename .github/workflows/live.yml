@@ -1,0 +1,96 @@
+name: live
+
+# 押したのに配っていない、を見つけるための門。
+#
+# 2026-08-24 に実際に起きたこと:
+#   worker のコードを直して push したが、wrangler deploy を打ち忘れていた。
+#   リポジトリは新しく、本番は古い。CI は緑。誰も気づかない。
+#   同じことが内部MCPで二度あった(古い写しを配りつづけた)。
+#
+# なので、本番に出ている版を、リポジトリの版と突き合わせる。
+#
+# push では走らせない。押した直後はまだ配っていないのが当たり前で、
+# そこで赤くすると「赤いのが普通」になり、門が門でなくなるため。
+# 1日1回と、手で叩いたときだけ。
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: what the live endpoint is actually serving
+        run: |
+          python3 - <<'PY'
+          import json, sys, time, urllib.request
+
+          URL = "https://jhnrd-mcp.oga-surf-project.workers.dev"
+          want = json.load(open("status.json", encoding="utf-8"))
+
+          def get(path, tries=3):
+              last = None
+              for i in range(tries):
+                  try:
+                      with urllib.request.urlopen(URL + path, timeout=20) as r:
+                          return r.status, r.read().decode("utf-8")
+                  except Exception as e:
+                      last = e
+                      time.sleep(3 * (i + 1))
+              return None, str(last)
+
+          # 届かないことと、届いて中身が違うことは、別の事実である。
+          # 届かないのは向こうの都合かもしれないので、赤にはしない。
+          status, body = get("/status.json")
+          if status is None:
+              print("::warning::本番に届かなかった: %s" % body)
+              print("届かないことは、古いことの証拠にはならない。ここでは止めない。")
+              sys.exit(0)
+
+          live = json.loads(body)
+          bad = []
+
+          if live.get("version") != want.get("version"):
+              bad.append("配っている版が違う: 本番=%s / リポジトリ=%s"
+                         % (live.get("version"), want.get("version")))
+          for k in ("items", "unconfirmed_requirements", "open_conflicts", "statute_current"):
+              if live.get(k) != want.get(k):
+                  bad.append("%s が違う: 本番=%s / リポジトリ=%s" % (k, live.get(k), want.get(k)))
+
+          if "利益相反" not in (live.get("disclosure") or ""):
+              bad.append("応答に利益相反の開示が入っていない")
+          if "算定の可否は判定しない" not in (live.get("we_do_not_say") or ""):
+              bad.append("応答に『算定の可否は判定しない』が入っていない")
+
+          # 断定を返していないか、本番で直に確かめる。
+          s2, b2 = get("/items")
+          if s2 is not None:
+              d2 = json.loads(b2)
+              strip = json.dumps(d2, ensure_ascii=False)
+              for m in ("『算定できます』", "「算定できます」", "『該当します』", "「該当します」"):
+                  strip = strip.replace(m, "")
+              strip = strip.replace(d2.get("we_do_not_say", "") or "", "")
+              for w in ("算定できます", "該当します"):
+                  if w in strip:
+                      bad.append("本番が断定を返している: %s" % w)
+
+          s3, _ = get("/mcp")
+          if s3 is not None and s3 != 405:
+              print("::warning::GET /mcp が %s を返した(405 のはず)" % s3)
+
+          if bad:
+              print("本番とリポジトリがずれている。")
+              for b in bad:
+                  print("  ・" + b)
+              print("")
+              print("押したのに配っていない可能性がある: cd mcp && npx wrangler deploy")
+              sys.exit(1)
+
+          print("本番が配っている版: %s / 項目 %s / 未確認 %s / 未解決 %s"
+                % (live.get("version"), live.get("items"),
+                   live.get("unconfirmed_requirements"), live.get("open_conflicts")))
+          print("リポジトリと一致。開示と断り書きも応答に入っている。")
+          PY

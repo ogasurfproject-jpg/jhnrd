@@ -42,6 +42,8 @@ jobs:
           node-version: "22"
       - name: the public MCP must not answer a billing question
         run: node mcp/mcp_test.mjs
+      - name: the once-a-day live check must itself still work
+        run: python3 tools/test_live_workflow.py
       - name: the conflict-of-interest disclosure must still be there
         run: |
           python3 -c "

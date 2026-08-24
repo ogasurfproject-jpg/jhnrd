@@ -3,6 +3,7 @@
 **Japan Home-visit Nursing Reimbursement Database — 訪問看護 算定要件データベース**
 
 [![validate](https://github.com/ogasurfproject-jpg/jhnrd/actions/workflows/validate.yml/badge.svg)](https://github.com/ogasurfproject-jpg/jhnrd/actions/workflows/validate.yml)
+[![live](https://github.com/ogasurfproject-jpg/jhnrd/actions/workflows/live.yml/badge.svg)](https://github.com/ogasurfproject-jpg/jhnrd/actions/workflows/live.yml)
 [![版](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fogasurfproject-jpg%2Fjhnrd%2Fmain%2Fstatus.json&query=%24.version&label=%E7%89%88&color=343a40&cacheSeconds=3600)](https://github.com/ogasurfproject-jpg/jhnrd/blob/main/status.json)
 [![項目数](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fogasurfproject-jpg%2Fjhnrd%2Fmain%2Fstatus.json&query=%24.items&label=%E9%A0%85%E7%9B%AE%E6%95%B0&color=0b7285&cacheSeconds=3600)](https://github.com/ogasurfproject-jpg/jhnrd/blob/main/status.json)
 [![現行statuteの出典](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fogasurfproject-jpg%2Fjhnrd%2Fmain%2Fstatus.json&query=%24.statute_current&label=%E7%8F%BE%E8%A1%8Cstatute%E3%81%AE%E5%87%BA%E5%85%B8&color=5f3dc4&cacheSeconds=3600)](https://github.com/ogasurfproject-jpg/jhnrd/blob/main/status.json)
@@ -131,6 +132,8 @@ GET  /status.json  /items  /items/<id>  /sources  /search?q=
 
 配るデータ（`mcp/rules.data.js`）は本体からの生成物で、**実行時に外へ取りに行きません。** 一度、raw.githubusercontent の縁に古い版が残って、内部の MCP が古い数字を配ったためです。**写しが本体とずれたら CI が赤になります。**
 
+さらに、**1日1回、本番に出ている版をリポジトリの版と突き合わせています**（上の `live` バッジ）。押したのに配っていない、を見つけるためです。**実際に一度やりました。** この門は「届かなかったとき」は赤にしません。**届かないことは、古いことの証拠にならない**ためです。そして**その判定そのものを、偽の本番9通りで毎回の CI が確かめています**（1日1回しか走らない門が壊れていることは、壊れてから最大1日、誰にも分からないので）。
+
 繋ぎ方:
 
 ```json
@@ -160,6 +163,7 @@ mcp/worker.js             公開MCP（鍵なし・読み取り専用）
 mcp/rules.data.js         公開MCPが配る写し（生成物。ずれたら CI が赤）
 mcp/mcp_test.mjs          公開MCPの試験（網は要らない。72件）
 tools/make_mcp_data.py    写しを本体から生成（--check を CI が見る）
+tools/test_live_workflow.py  1日1回の門(live.yml)の判定を、偽の本番9通りで確かめる
 ```
 
 `data/rules_2024.json` の構造:
