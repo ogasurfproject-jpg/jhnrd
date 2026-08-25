@@ -36,7 +36,7 @@ The reason for that line is simple: **when a claim is returned, someone has to b
 <!-- auto:state:start -->
 | | |
 |---|---|
-| Version | `2024-kaitei.seed.21` |
+| Version | `2024-kaitei.seed.22` |
 | Items | **33** |
 | Sources — `statute` (the notice/ordinance/circular itself) | 11 |
 | of which **current** | **8** |
