@@ -1,0 +1,139 @@
+name: release
+
+# 押したら、あとは全部これがやる。
+#
+# なぜ要る (2026-08-25):
+#   版を1つ上げるたびに、人が4回打っていた。
+#     1. git push --tags
+#     2. cd mcp && npx wrangler deploy
+#     3. mcp-publisher login github (デバイスコードを手で入力) && mcp-publisher publish
+#     4. gh workflow run live.yml
+#   3 が特に悪い。ブラウザで6桁を入れる作業が毎回入るうえ、
+#   トークンが数分で切れるので login と publish を必ずセットで打つ必要があった。
+#   実際、切れたトークンで publish して 401 を出したことが2回ある。
+#
+#   そして順番を間違えると live.yml が赤くなる。
+#   本番の口とレジストリの名刺が、リポジトリより古いままになるからである。
+#   「押したのに反映されていない」を、人の手順の正しさに賭けない。
+#
+#   OIDC を使えばデバイスコードは要らない(GitHub が Actions に身分証を出す)。
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "server.json"
+      - "mcp/**"
+      - "data/**"
+      - "status.json"
+  workflow_dispatch:
+
+permissions:
+  id-token: write     # OIDC でレジストリに名乗るために要る
+  contents: read
+  actions: write      # 最後に live.yml を起こすために要る
+
+concurrency:
+  group: jhnrd-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 配る前に、配るものが正しいことを確かめる。
+      # ここが赤いなら、本番に出してはいけない。
+      - name: 配る前の検査
+        run: |
+          python3 tools/validate.py
+          python3 tools/update_readme.py --check
+          python3 tools/make_metadata.py --check
+          python3 tools/make_mcp_data.py --check
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 公開MCPの試験
+        run: node mcp/mcp_test.mjs
+
+      # --- 1) 本番の口を入れ替える ---
+      # 鍵が無い場合は、黙って飛ばさない。飛ばしたと言う。
+      - name: Cloudflare の鍵があるか
+        id: cf
+        run: |
+          if [ -n "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]; then
+            echo "have=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "have=no" >> "$GITHUB_OUTPUT"
+            echo "::warning::CLOUDFLARE_API_TOKEN が無いので公開MCPを配っていない。手で cd mcp && npx wrangler deploy すること。"
+          fi
+
+      - name: 公開MCPを配る
+        if: steps.cf.outputs.have == 'yes'
+        working-directory: mcp
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4 deploy
+
+      # --- 2) レジストリの名刺を出し直す ---
+      - name: mcp-publisher を入れる
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+
+      # レジストリは同じ版を二度受け取らない。
+      # 同じなら出し直さない(400 を出して赤くするのは、門ではなく誤報になる)。
+      - name: レジストリに載っている版と見比べる
+        id: reg
+        run: |
+          want=$(python3 -c "import json;print(json.load(open('server.json'))['version'])")
+          have=$(curl -s --max-time 30 "https://registry.modelcontextprotocol.io/v0/servers?search=jhnrd&limit=10" \
+                 | python3 -c "
+          import json,sys
+          try: rows=(json.load(sys.stdin).get('servers') or [])
+          except Exception: print('unknown'); raise SystemExit
+          for r in rows:
+              s=r.get('server') or {}
+              off=(r.get('_meta') or {}).get('io.modelcontextprotocol.registry/official') or {}
+              if s.get('name')=='io.github.ogasurfproject-jpg/jhnrd' and off.get('isLatest') is True:
+                  print(s.get('version') or 'unknown'); break
+          else: print('none')
+          ")
+          echo "want=$want" >> "$GITHUB_OUTPUT"
+          echo "have=$have" >> "$GITHUB_OUTPUT"
+          echo "リポジトリ=$want / レジストリ=$have"
+
+      - name: レジストリに名乗る(OIDC・デバイスコード不要)
+        if: steps.reg.outputs.want != steps.reg.outputs.have
+        run: ./mcp-publisher login github-oidc
+
+      - name: レジストリに出す
+        if: steps.reg.outputs.want != steps.reg.outputs.have
+        run: ./mcp-publisher publish
+
+      - name: 版が同じなので出し直していない
+        if: steps.reg.outputs.want == steps.reg.outputs.have
+        run: echo "レジストリは既に ${{ steps.reg.outputs.want }}。出し直す必要が無い。"
+
+      # --- 3) 三つが揃ったかを、機械に見に行かせる ---
+      # 本番の口の入れ替えは、返るまでに少し間がある。
+      - name: 少し待つ
+        run: sleep 45
+
+      - name: live.yml を起こす(本番・リポジトリ・レジストリの照合)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/live.yml/dispatches" \
+            -d '{"ref":"main"}'
+          echo "live.yml を起こした。結果はそちらで見ること。"

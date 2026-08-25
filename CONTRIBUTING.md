@@ -49,6 +49,42 @@ python3 tools/update_readme.py --check   # ずれていないか（CI がこれ�
 4. `python3 tools/validate.py` → `python3 tools/update_readme.py --write`
 5. commit し、`git tag -a seed.N` を打つ
 
+## 版を切って出す（押すだけ）
+
+```bash
+python3 tools/validate.py
+python3 tools/update_readme.py --write
+python3 tools/make_metadata.py --write
+python3 tools/make_mcp_data.py --write
+git commit -am "seed.N: 何をどう直したか"
+git tag -a seed.N -F -   # 注釈に数字と、何を直したかを書く
+git push origin main --tags
+```
+
+**押したあとは何もしません。** `.github/workflows/release.yml` が、
+
+1. 配る前の検査（`validate` / 3つの `--check` / 公開MCPの試験）
+2. **公開MCPを本番に配る**（Cloudflare）
+3. **公式レジストリに名刺を出し直す**（OIDC。**デバイスコードの入力は要りません**）
+4. **`live.yml` を起こす** — 本番の口・リポジトリ・レジストリの三つが揃ったかを機械が照合
+
+をこの順でやります。**順番を人の手順の正しさに賭けません。**
+
+> 2026-08-25 まで、ここは人が4回打っていました。うち1回はブラウザで6桁を入れる作業で、
+> トークンが数分で切れるため `login` と `publish` を必ずセットで打つ必要がありました。
+> 実際、切れたトークンで publish して 401 を出したことが2回あります。
+> そして順番を間違えると `live.yml` が赤くなります。**赤くなるのは正しいのですが、
+> 毎回人が正しい順で打てることを前提にした門は、いつか誤報を出します。**
+
+**必要な secret は1つだけです**（無ければ配る手順だけ飛ばして、飛ばしたと警告に出ます）。
+
+| 名前 | 何 |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | 公開MCP(Workers)を配るため。`Edit Cloudflare Workers` 権限 |
+| `CLOUDFLARE_ACCOUNT_ID` | 上と同じ用途（アカウントが1つなら省略可） |
+
+レジストリ側の secret は**要りません**。GitHub が Actions に身分証（OIDC）を出すので、それで名乗ります。
+
 ## 表を読むときの規律（規律 10）
 
 **表を丸ごと要約させないでください。1項目ずつ名指しして、短く引用させてください。そのうえで二つ以上で一致させてください。**
