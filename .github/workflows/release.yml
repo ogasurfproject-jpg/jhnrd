@@ -77,9 +77,25 @@ jobs:
         run: |
           # 空白と改行を落としてから見る。理由は下の「配る」手順のコメントに書いた。
           clean="$(printf '%s' "$CF_TOKEN" | tr -d '[:space:]')"
+          # 2026-08-25: 鍵の欄に curl コマンドまるごとが入っていた。
+          #   Cloudflare の画面には「Test this token」の curl が並んでいて、
+          #   そちらをコピーしてしまうと、鍵ではなくコマンドが保存される。
+          #   Cloudflare が返すのは
+          #     Invalid format for Authorization header [code: 6111]
+          #   という、原因の見えないエラーである。ここで見分けて、名指しで言う。
+          if printf '%s' "$clean" | grep -qiE 'curl|authorization|bearer|https://'; then
+            echo "have=no" >> "$GITHUB_OUTPUT"
+            echo "::error::CLOUDFLARE_API_TOKEN に、鍵ではなく curl コマンドか URL が入っている。Cloudflare の画面の『Test this token』の curl ではなく、その上のトークンの箱の値(cfut_ で始まる1行)だけを入れ直すこと。"
+            exit 1
+          fi
+          if [ ${#clean} -gt 200 ]; then
+            echo "have=no" >> "$GITHUB_OUTPUT"
+            echo "::error::CLOUDFLARE_API_TOKEN が長すぎる(${#clean}文字)。鍵以外のものが混ざっている。"
+            exit 1
+          fi
           if [ -n "$clean" ]; then
             echo "have=yes" >> "$GITHUB_OUTPUT"
-            echo "鍵を受け取った。公開MCPを配る。"
+            echo "鍵を受け取った(${#clean}文字)。公開MCPを配る。"
             if [ "$clean" != "$CF_TOKEN" ]; then
               echo "::warning::鍵に空白か改行が混ざっていたので落とした。貼り直さなくてよいが、次に入れるときはコピーボタンを使うこと。"
             fi
