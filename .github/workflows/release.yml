@@ -75,21 +75,38 @@ jobs:
         env:
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
-          if [ -n "$CF_TOKEN" ]; then
+          # 空白と改行を落としてから見る。理由は下の「配る」手順のコメントに書いた。
+          clean="$(printf '%s' "$CF_TOKEN" | tr -d '[:space:]')"
+          if [ -n "$clean" ]; then
             echo "have=yes" >> "$GITHUB_OUTPUT"
-            echo "鍵を受け取った(長さ >0)。公開MCPを配る。"
+            echo "鍵を受け取った。公開MCPを配る。"
+            if [ "$clean" != "$CF_TOKEN" ]; then
+              echo "::warning::鍵に空白か改行が混ざっていたので落とした。貼り直さなくてよいが、次に入れるときはコピーボタンを使うこと。"
+            fi
           else
             echo "have=no" >> "$GITHUB_OUTPUT"
             echo "::warning::CLOUDFLARE_API_TOKEN を受け取れなかった。公開MCPを配っていない。手で cd mcp && npx wrangler deploy すること。"
           fi
 
+      # 2026-08-25: 鍵に改行が混ざっていて、wrangler が
+      #   Headers.set: "***\n***" is an invalid header value. で落ちた。
+      #   Cloudflare の画面はトークンを3行に折り返して表示する。
+      #   コピーボタンを使わずに選択してコピーすると、その折り返しが改行として入る。
+      #   鍵そのものは正しい。入れ物の問題である。
+      #
+      #   人に貼り直させない。こちらで落とす。API トークンに空白は入らないので、
+      #   全部の空白文字を落として困ることはない。
+      #   直させる作りにすると、次に別の人が同じところで同じ半日を使う。
       - name: 公開MCPを配る
         if: steps.cf.outputs.have == 'yes'
         working-directory: mcp
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx --yes wrangler@4 deploy
+          CF_TOKEN_RAW: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_RAW: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          export CLOUDFLARE_API_TOKEN="$(printf '%s' "$CF_TOKEN_RAW" | tr -d '[:space:]')"
+          export CLOUDFLARE_ACCOUNT_ID="$(printf '%s' "$CF_ACCOUNT_RAW" | tr -d '[:space:]')"
+          npx --yes wrangler@4 deploy
 
       # --- 2) レジストリの名刺を出し直す ---
       - name: mcp-publisher を入れる
