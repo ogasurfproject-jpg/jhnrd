@@ -65,14 +65,22 @@ jobs:
 
       # --- 1) 本番の口を入れ替える ---
       # 鍵が無い場合は、黙って飛ばさない。飛ばしたと言う。
+      # 2026-08-25: ここは "${{ secrets.X }}" を run: の中に直接書いていた。
+      #   secret は現に入っていたのに、判定が「無い」になり、
+      #   配る手順が2回とも飛んだ。飛んだと警告は出たので気づけたが、
+      #   「入れたのに効かない」を1往復ぶん無駄にした。
+      #   秘密は env: で渡す。これが GitHub の作法でもある。
       - name: Cloudflare の鍵があるか
         id: cf
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
-          if [ -n "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]; then
+          if [ -n "$CF_TOKEN" ]; then
             echo "have=yes" >> "$GITHUB_OUTPUT"
+            echo "鍵を受け取った(長さ >0)。公開MCPを配る。"
           else
             echo "have=no" >> "$GITHUB_OUTPUT"
-            echo "::warning::CLOUDFLARE_API_TOKEN が無いので公開MCPを配っていない。手で cd mcp && npx wrangler deploy すること。"
+            echo "::warning::CLOUDFLARE_API_TOKEN を受け取れなかった。公開MCPを配っていない。手で cd mcp && npx wrangler deploy すること。"
           fi
 
       - name: 公開MCPを配る
