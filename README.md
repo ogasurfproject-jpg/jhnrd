@@ -1,5 +1,7 @@
 # JHNRD
 
+> Part of **[Awesome HORIZON SHIELD](https://github.com/ogasurfproject-jpg/awesome-horizon-shield)** — the checkable index of every dataset, MCP server and ledger we run.
+
 **Japan Home-visit Nursing Reimbursement Database**
 
 [![validate](https://github.com/ogasurfproject-jpg/jhnrd/actions/workflows/validate.yml/badge.svg)](https://github.com/ogasurfproject-jpg/jhnrd/actions/workflows/validate.yml)
