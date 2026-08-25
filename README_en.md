@@ -22,7 +22,7 @@ The numbers themselves are public. **What this dataset holds is where each numbe
 
 The rest are ministry material that is not the statute text (`agency`, 8) and private commentary (`secondary`, 7).
 
-**48 requirements are unconfirmed.** Anything we could not check against the statute text says so. It is not left blank.
+**54 requirements are unconfirmed.** Anything we could not check against the statute text says so. It is not left blank.
 <!-- auto:caution:end -->
 
 What this dataset can say is: *"this reduction has requirements A, B and C, and C has not yet been confirmed against the statute text."* It never says *"you may bill this"* or *"this applies to you."*
@@ -36,14 +36,14 @@ The reason for that line is simple: **when a claim is returned, someone has to b
 <!-- auto:state:start -->
 | | |
 |---|---|
-| Version | `2024-kaitei.seed.20` |
+| Version | `2024-kaitei.seed.21` |
 | Items | **33** |
 | Sources — `statute` (the notice/ordinance/circular itself) | 11 |
 | of which **current** | **8** |
 | Sources — `agency` (MHLW material, not the statute text) | 8 |
 | Sources — `secondary` (private commentary) | 7 |
 | Sources, total | 26 (5 not current) |
-| Unconfirmed requirements | **48** |
+| Unconfirmed requirements | **54** |
 | Conflicts | 4 total / **1** unresolved |
 | Field reports | 0 (never a source of rules) |
 | Last validated | 2026-08-25 |
