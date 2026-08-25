@@ -18,7 +18,7 @@ The numbers themselves are public. **What this dataset holds is where each numbe
 ## Do not make a billing decision on this alone
 
 <!-- auto:caution:start -->
-**7 sources currently rest on the statute text itself** (`statute` — the ministerial notice, ordinance or circular). `statute` is 10 in total; 5 of those are superseded revisions and **cannot be used as current authority.** They are kept only so that the revision history is legible.
+**8 sources currently rest on the statute text itself** (`statute` — the ministerial notice, ordinance or circular). `statute` is 11 in total; 5 of those are superseded revisions and **cannot be used as current authority.** They are kept only so that the revision history is legible.
 
 The rest are ministry material that is not the statute text (`agency`, 8) and private commentary (`secondary`, 7).
 
@@ -36,17 +36,17 @@ The reason for that line is simple: **when a claim is returned, someone has to b
 <!-- auto:state:start -->
 | | |
 |---|---|
-| Version | `2024-kaitei.seed.19` |
+| Version | `2024-kaitei.seed.20` |
 | Items | **33** |
-| Sources — `statute` (the notice/ordinance/circular itself) | 10 |
-| of which **current** | **7** |
+| Sources — `statute` (the notice/ordinance/circular itself) | 11 |
+| of which **current** | **8** |
 | Sources — `agency` (MHLW material, not the statute text) | 8 |
 | Sources — `secondary` (private commentary) | 7 |
-| Sources, total | 25 (5 not current) |
+| Sources, total | 26 (5 not current) |
 | Unconfirmed requirements | **48** |
-| Conflicts | 3 total / **0** unresolved |
+| Conflicts | 4 total / **1** unresolved |
 | Field reports | 0 (never a source of rules) |
-| Last validated | 2026-08-24 |
+| Last validated | 2026-08-25 |
 
 33 items. **This is not a complete map of the rules.** The name runs ahead of the contents, and the item count is put first so that this is not hidden.
 <!-- auto:state:end -->

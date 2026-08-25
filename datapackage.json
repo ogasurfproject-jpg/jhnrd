@@ -3,10 +3,10 @@
   "name": "jhnrd",
   "title": "JHNRD — Japan Home-visit Nursing Reimbursement Database",
   "id": "https://doi.org/10.5281/zenodo.22083722",
-  "version": "2024-kaitei.seed.19",
-  "description": "訪問看護の減算・加算・指示書の期限について、要件と、その要件がどの資料に基づくかを一つずつ記録したデータセット。数字そのものは公開情報であり、ここが持っているのは「その数字がどこから来たのか」という記録である。出典は statute(告示・省令・通知の原文) / agency(厚生労働省の資料) / secondary(民間の解説) の三段階で素性を名乗り、現行版かどうかを別に持つ。確認できていない要件は空欄にせず confirmed:false と理由を残す。出典どうしが食い違ったときは、片方を選ばず両方を残す。取りに行って取れなかった記録(attempts)も公開する。算定の可否は判定しない。この版は 33 項目・出典 25 件(うち現行の statute 7 件)・未確認の要件 48 件・未解決の食い違い 0 件。33 項目は訪問看護の算定要件を網羅した数ではない。",
+  "version": "2024-kaitei.seed.20",
+  "description": "訪問看護の減算・加算・指示書の期限について、要件と、その要件がどの資料に基づくかを一つずつ記録したデータセット。数字そのものは公開情報であり、ここが持っているのは「その数字がどこから来たのか」という記録である。出典は statute(告示・省令・通知の原文) / agency(厚生労働省の資料) / secondary(民間の解説) の三段階で素性を名乗り、現行版かどうかを別に持つ。確認できていない要件は空欄にせず confirmed:false と理由を残す。出典どうしが食い違ったときは、片方を選ばず両方を残す。取りに行って取れなかった記録(attempts)も公開する。算定の可否は判定しない。この版は 33 項目・出典 26 件(うち現行の statute 8 件)・未確認の要件 48 件・未解決の食い違い 1 件。33 項目は訪問看護の算定要件を網羅した数ではない。",
   "homepage": "https://github.com/ogasurfproject-jpg/jhnrd",
-  "created": "2026-08-24",
+  "created": "2026-08-25",
   "licenses": [
     {
       "name": "CC-BY-4.0",
@@ -68,17 +68,17 @@
     "note": "この節の数字は tools/make_metadata.py が status.json から生成する。手で書かない。",
     "counts": {
       "items": 33,
-      "sources_total": 25,
-      "sources_statute": 10,
-      "sources_statute_current": 7,
+      "sources_total": 26,
+      "sources_statute": 11,
+      "sources_statute_current": 8,
       "sources_agency": 8,
       "sources_secondary": 7,
       "sources_not_current": 5,
       "unconfirmed_requirements": 48,
-      "conflicts_total": 3,
-      "open_conflicts": 0,
+      "conflicts_total": 4,
+      "open_conflicts": 1,
       "field_reports": 0,
-      "checked_at": "2026-08-24"
+      "checked_at": "2026-08-25"
     },
     "tiers": {
       "statute": "告示・省令・通知の原文。最も強い。",
