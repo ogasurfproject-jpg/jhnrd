@@ -21,8 +21,12 @@ import io, json, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
-README = os.path.join(ROOT, "README.md")
-README_EN = os.path.join(ROOT, "README_en.md")
+# 2026-08-25: 入口を英語にした。README.md が英語、README.ja.md が日本語である。
+#   見つける側(AI・研究者・Zenodo・MCPレジストリ)は英語で探し、
+#   直せる側(訪問看護の現場)は日本語で読む。両方要るが、正面に立つのは英語の方。
+#   ここを入れ替えたので、build と build_en の行き先も入れ替わっている。
+README_EN = os.path.join(ROOT, "README.md")
+README_JA = os.path.join(ROOT, "README.ja.md")
 STATUS = os.path.join(ROOT, "status.json")
 RULES = os.path.join(ROOT, "data", "rules_2024.json")
 
@@ -157,14 +161,14 @@ def main():
     st = json.load(io.open(STATUS, encoding="utf-8"))
     db = json.load(io.open(RULES, encoding="utf-8"))
     drift = []
-    for path, builder in ((README, build), (README_EN, build_en)):
+    for path, builder in ((README_JA, build), (README_EN, build_en)):
         cur = io.open(path, encoding="utf-8").read()
         new = apply_blocks(cur, builder(st, db))
         if new != cur:
             drift.append((path, new))
 
     if not drift:
-        print("README.md / README_en.md は status.json と一致しています。")
+        print("README.md (EN) / README.ja.md は status.json と一致しています。")
         return 0
     if "--write" in sys.argv:
         for path, new in drift:

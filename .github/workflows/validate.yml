@@ -20,7 +20,7 @@ jobs:
         run: |
           python3 tools/update_readme.py --check || {
             echo "README numbers are out of step with status.json."
-            echo "Run python3 tools/update_readme.py --write and commit README.md too."
+            echo "Run python3 tools/update_readme.py --write and commit README.md / README.ja.md too."
             exit 1
           }
       - name: the machine-readable metadata must match status.json
@@ -49,9 +49,9 @@ jobs:
           python3 -c "
           import io, sys
           need = [
-              ('README.md', '## 利益相反の開示'),
-              ('README.md', '有償のサービスを訪問看護事業所に販売しています'),
-              ('README_en.md', '## Conflict of interest'),
+              ('README.ja.md', '## 利益相反の開示'),
+              ('README.ja.md', '有償のサービスを訪問看護事業所に販売しています'),
+              ('README.md', '## Conflict of interest'),
               ('GOVERNANCE.md', '有償のサービスを、訪問看護事業所に販売しています'),
               ('datapackage.json', 'conflict_of_interest'),
               ('.zenodo.json', 'Conflict of interest'),
